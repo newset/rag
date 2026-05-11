@@ -1,6 +1,6 @@
 import { useParams } from 'react-router-dom';
 import { useState, useEffect } from 'react';
-import ReactMarkdown from 'react-markdown';
+import { marked } from 'marked';
 import { useApp } from '../App';
 import CommentsList from '../components/CommentsList';
 import CommentForm from '../components/CommentForm';
@@ -54,9 +54,10 @@ export default function BlogPage() {
           </div>
         </header>
 
-        <div className="article-body">
-          <ReactMarkdown>{issue.body}</ReactMarkdown>
-        </div>
+        <div
+          className="article-body markdown-body"
+          dangerouslySetInnerHTML={{ __html: marked.parse(issue.body || '') }}
+        />
 
         <div className="article-tags">
           {issue.labels.map(label => (

@@ -34,25 +34,6 @@ export default function BlogPage() {
     }
   }
 
-  function renderMarkdown(text) {
-    if (!text) return '';
-    let html = text
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/^###\s*(.*)$/gm, '<h3>$1</h3>')
-      .replace(/^##\s*(.*)$/gm, '<h2>$1</h2>')
-      .replace(/^#\s*(.*)$/gm, '<h1>$1</h1>')
-      .replace(/^\s*\*\s+(.*)$/gm, '<li>$1</li>')
-      .replace(/\n<li>(.*?)<\/li>/g, '<ul><li>$1</li></ul>')
-      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-      .replace(/\*(.*?)\*/g, '<em>$1</em>')
-      .replace(/`([^`]+)`/g, '<code>$1</code>')
-      .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank" rel="noreferrer">$1</a>')
-      .replace(/\n/g, '<br />');
-    return html;
-  }
-
   function formatDate(iso) {
     const date = new Date(iso);
     return date.toLocaleDateString('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit' });
@@ -73,7 +54,9 @@ export default function BlogPage() {
           </div>
         </header>
 
-        <div className="article-body" dangerouslySetInnerHTML={{ __html: renderMarkdown(issue.body) }} />
+        <div className="article-body">
+          <ReactMarkdown>{issue.body}</ReactMarkdown>
+        </div>
 
         <div className="article-tags">
           {issue.labels.map(label => (

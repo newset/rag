@@ -3,6 +3,7 @@ import HomePage from './pages/HomePage';
 import TagPage from './pages/TagPage';
 import BlogPage from './pages/BlogPage';
 import AboutPage from './pages/AboutPage';
+import AdminPage from './pages/AdminPage';
 import { ReactNode, createContext, useState, useContext, useEffect } from 'react';
 import './App.css';
 
@@ -122,6 +123,7 @@ export default function App() {
             <nav className="site-nav">
               <Link to="/">首页</Link>
               <Link to="/about">关于</Link>
+              <Link to="/admin">管理</Link>
               <a href="https://github.com/newset/rag" target="_blank" rel="noreferrer">源码</a>
             </nav>
           </header>
@@ -132,6 +134,7 @@ export default function App() {
               <Route path="/tag/:id" element={<TagPage />} />
               <Route path="/blog/:id" element={<BlogPage />} />
               <Route path="/about" element={<AboutPage />} />
+              <Route path="/admin" element={<AdminPage />} />
             </Routes>
           </main>
 

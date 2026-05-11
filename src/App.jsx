@@ -1,12 +1,15 @@
-import { HashRouter, Routes, Route, Link } from 'react-router-dom';
+import { createContext, useContext, useEffect, useState } from 'react';
+import { HashRouter, Routes, Route } from 'react-router-dom';
 import HomePage from './pages/HomePage';
 import TagPage from './pages/TagPage';
 import BlogPage from './pages/BlogPage';
+import AboutPage from './pages/AboutPage';
 import ResumePage from './pages/ResumePage';
 import TagsPage from './pages/TagsPage';
 import AdminPage from './pages/AdminPage';
-import { ReactNode, createContext, useState, useContext, useEffect } from 'react';
+import UIPage from './pages/UIPage';
 import './App.css';
+import { AuraFooter, AuraNavbar, AuraStyleProvider } from './components/ui/AuraUI';
 
 const OWNER = 'newset';
 const REPO = 'rag';
@@ -30,10 +33,10 @@ export default function App() {
   }, []);
 
   async function fetchJson(url, options = {}) {
-    const token = import.meta.env.VITE_GITHUB_TOKEN;
+    const envToken = import.meta.env.VITE_GITHUB_TOKEN;
     const headers = { ...options.headers };
-    if (token && !headers.Authorization) {
-      headers.Authorization = `token ${token}`;
+    if (envToken && !headers.Authorization) {
+      headers.Authorization = `token ${envToken}`;
     }
     const response = await fetch(url, { ...options, headers });
     const text = await response.text();
@@ -113,35 +116,22 @@ export default function App() {
   return (
     <AppContext.Provider value={value}>
       <HashRouter>
-        <div className="app">
-          <header className="site-header">
-            <div>
-              <h1>
-                <Link to="/">NEWSET</Link>
-              </h1>
-            </div>
-            <nav className="site-nav">
-              <Link to="/">首页</Link>
-              <Link to="/">作品</Link>
-              <Link to="/tags">标签</Link>
-              <Link to="/about">关于</Link>
-            </nav>
-          </header>
-
-          <main className="main-content">
+        <AuraStyleProvider>
+          <AuraNavbar />
+          <main className="main-content aura-main">
             <Routes>
               <Route path="/" element={<HomePage />} />
               <Route path="/tag/:id" element={<TagPage />} />
               <Route path="/blog/:id" element={<BlogPage />} />
               <Route path="/tags" element={<TagsPage />} />
-              <Route path="/about" element={<ResumePage />} />
+              <Route path="/about" element={<AboutPage />} />
+              <Route path="/resume" element={<ResumePage />} />
               <Route path="/admin" element={<AdminPage />} />
+              <Route path="/ui" element={<UIPage />} />
             </Routes>
           </main>
-
-          <footer className="site-footer">
-          </footer>
-        </div>
+          <AuraFooter />
+        </AuraStyleProvider>
       </HashRouter>
     </AppContext.Provider>
   );

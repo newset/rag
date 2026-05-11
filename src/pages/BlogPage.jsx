@@ -1,10 +1,11 @@
-import { useParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { marked } from 'marked';
 import { useApp } from '../App';
 import CommentsList from '../components/CommentsList';
 import CommentForm from '../components/CommentForm';
 import TagLink from '../components/TagLink';
+import { EmptyState, PostArtwork } from '../components/ui/AuraUI';
 import '../pages.css';
 
 export default function BlogPage() {
@@ -16,9 +17,7 @@ export default function BlogPage() {
   const issue = issues.find(i => i.number === Number(issueNumber));
 
   useEffect(() => {
-    if (issue) {
-      fetchComments();
-    }
+    if (issue) fetchComments();
   }, [issue]);
 
   async function fetchComments() {
@@ -40,45 +39,49 @@ export default function BlogPage() {
   }
 
   if (!issue) {
-    return <div className="empty">文章不存在。</div>;
+    return <div className="aura-container"><EmptyState title="文章不存在" description="可能还在从 GitHub 加载，或该 Issue 已被删除。" /></div>;
   }
 
   return (
-    <div className="blog-page">
-      <article className="blog-article">
-        <header className="article-header">
-          <h1>{issue.title}</h1>
-          <div className="article-meta">
-            <span>发布于 {formatDate(issue.created_at)}</span>
-            <span>{comments.length} 条留言</span>
-          </div>
-        </header>
+    <div className="blog-page aura-page">
+      <div className="blog-reading-progress" />
+      <header className="article-hero aura-container">
+        <Link to="/" className="back-button">← 返回文章列表</Link>
+        <div className="article-kicker">
+          {(issue.labels[0]) && <TagLink tag={issue.labels[0]} />}
+          <span>{formatDate(issue.created_at)}</span>
+          <span>{comments.length || issue.comments} 条留言</span>
+        </div>
+        <h1>{issue.title}</h1>
+      </header>
 
-        <div
-          className="article-body markdown-body"
-          dangerouslySetInnerHTML={{ __html: marked.parse(issue.body || '') }}
-        />
+      <div className="article-cover aura-container">
+        {/* <PostArtwork large tone="accent" symbol="✦" /> */}
+      </div>
 
+      <article className="blog-article aura-container">
+        <div className="article-body markdown-body" dangerouslySetInnerHTML={{ __html: marked.parse(issue.body || '') }} />
         <div className="article-tags">
-          {issue.labels.map(label => (
-            <TagLink key={label} tag={label} />
-          ))}
+          {issue.labels.map(label => <TagLink key={label} tag={label} />)}
         </div>
       </article>
 
-      <section className="comments-section">
-        <h2>留言</h2>
+      <section className="comments-section aura-container">
+        <div className="comments-header">
+          <div>
+            <p className="section-label">Discussion</p>
+          </div>
+          <span>{comments.length || issue.comments} 条</span>
+        </div>
         {loadingComments ? (
           <div className="loading">加载留言中...</div>
         ) : (
           <>
-            <CommentsList comments={comments} />
+            <CommentsList issueNumber={issue.number} comments={comments} />
             {user ? (
-              <CommentForm issue={issue} onCommentAdded={() => fetchComments()} />
+              <CommentForm issueNumber={issue.number} onCommentAdded={fetchComments} />
             ) : (
-              <div className="login-prompt">
-                <p>登录后才能发表评论。请在右侧登录。</p>
-              </div>
+              <div className="login-prompt"><p>登录后才能发表评论。请前往后台或登录区配置 GitHub Token。</p></div>
             )}
           </>
         )}

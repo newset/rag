@@ -36,7 +36,7 @@ export default function CommentsList({ issueNumber, comments, setComments }) {
       reactionsEnabled="1"
       emitMetadata="0"
       inputPosition="top"
-      theme="catppuccin_latte"
+      theme="catppuccin_mocha"
       lang="zh-CN"
       loading="lazy"
     />

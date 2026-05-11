@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RAG Blog</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="page-shell">
+    <header class="site-header">
+      <div>
+        <h1>RAG 博客</h1>
+        <p>使用当前仓库 Issue 作为文章，Label 作为标签，支持标签与年月筛选、留言功能。</p>
+      </div>
+      <div class="site-meta">
+        <span>仓库：newset/rag</span>
+        <a href="https://github.com/newset/rag" target="_blank" rel="noreferrer">查看源码</a>
+      </div>
+    </header>
+
+    <section class="toolbar">
+      <div class="filter-row">
+        <div class="filter-item">
+          <label for="searchInput">搜索</label>
+          <input id="searchInput" type="search" placeholder="标题或内容搜索" />
+        </div>
+        <div class="filter-item">
+          <label for="tagSelect">标签</label>
+          <select id="tagSelect">
+            <option value="">全部标签</option>
+          </select>
+        </div>
+        <div class="filter-item">
+          <label for="monthSelect">年月</label>
+          <select id="monthSelect">
+            <option value="">全部年月</option>
+          </select>
+        </div>
+      </div>
+    </section>
+
+    <main class="content-grid">
+      <section class="post-list" id="posts"></section>
+
+      <aside class="side-panel">
+        <div class="card" id="loginCard">
+          <h2>留言登录</h2>
+          <div id="authStatus" class="auth-status">加载中...</div>
+          <div id="authForm" class="auth-form">
+            <label for="tokenInput">GitHub 访问令牌</label>
+            <input id="tokenInput" type="password" placeholder="请输入 GitHub Personal Access Token" />
+            <p class="hint">只需 `public_repo` 或 `repo` 权限即可发表评论。</p>
+            <button id="loginButton">登录</button>
+          </div>
+          <div id="authActions" class="auth-actions hidden">
+            <p>已登录：<span id="loginName"></span></p>
+            <button id="logoutButton">退出登录</button>
+          </div>
+        </div>
+
+        <div class="card" id="helpCard">
+          <h2>使用说明</h2>
+          <ul>
+            <li>文章来源：当前仓库 Issue（排除 PR）。</li>
+            <li>标签来源：Issue label。</li>
+            <li>留言使用 GitHub Issue 评论，需要登录并提供 Token。</li>
+            <li>选择文章后可查看评论和发布新留言。</li>
+          </ul>
+        </div>
+      </aside>
+    </main>
+
+    <section class="post-detail hidden" id="postDetail">
+      <div class="detail-header">
+        <button id="backButton" class="back-button">← 返回文章列表</button>
+        <div class="detail-meta" id="detailMeta"></div>
+      </div>
+      <article class="detail-body" id="detailBody"></article>
+      <div class="detail-tags" id="detailTags"></div>
+      <div class="comments-section">
+        <div class="comments-header">
+          <h2>留言</h2>
+          <span id="commentsCount">加载中...</span>
+        </div>
+        <div id="commentsList"></div>
+        <div class="comment-form">
+          <textarea id="commentInput" rows="4" placeholder="输入留言内容（需要登录）"></textarea>
+          <button id="postCommentButton">发布留言</button>
+        </div>
+      </div>
+    </section>
+
+    <div class="toast hidden" id="toastMessage"></div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

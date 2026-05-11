@@ -5,6 +5,7 @@ import { useApp } from '../App';
 import LoginCard from '../components/LoginCard';
 import PostCard from '../components/PostCard';
 import Pagination from '../components/Pagination';
+import Loading from '../components/Loading';
 
 const ITEMS_PER_PAGE = 10;
 
@@ -111,7 +112,7 @@ export default function HomePage() {
       <div className="content-grid">
         <section className="post-list">
           {loading ? (
-            <div className="loading">加载中...</div>
+            <Loading />
           ) : filtered.length === 0 ? (
             <div className="empty">没有符合条件的文章。</div>
           ) : (

@@ -139,19 +139,6 @@ export default function HomePage() {
             </>
           )}
         </section>
-
-        <aside className="side-panel">
-          <LoginCard />
-          <div className="card help-card">
-            <h2>使用说明</h2>
-            <ul>
-              <li>文章来源：当前仓库 Issue（排除 PR）。</li>
-              <li>标签来源：Issue label。</li>
-              <li>留言使用 GitHub Issue 评论，需要登录并提供 Token。</li>
-              <li>选择文章后可查看评论和发布新留言。</li>
-            </ul>
-          </div>
-        </aside>
       </div>
     </div>
   );

@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
+import { HashRouter, Routes, Route, Link } from 'react-router-dom';
 import HomePage from './pages/HomePage';
 import TagPage from './pages/TagPage';
 import BlogPage from './pages/BlogPage';
@@ -110,7 +110,7 @@ export default function App() {
 
   return (
     <AppContext.Provider value={value}>
-      <BrowserRouter basename="/rag">
+      <HashRouter>
         <div className="app">
           <header className="site-header">
             <div>
@@ -139,7 +139,7 @@ export default function App() {
             <p>© 2024 RAG 博客 | 基于 <a href="https://github.com" target="_blank" rel="noreferrer">GitHub Issue</a></p>
           </footer>
         </div>
-      </BrowserRouter>
+      </HashRouter>
     </AppContext.Provider>
   );
 }

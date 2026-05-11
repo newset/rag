@@ -4,7 +4,7 @@ export default function CommentsList({ issueNumber, comments, setComments }) {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (comments.length === 0) {
+    if (!comments || comments.length === 0) {
       loadComments();
     }
   }, [issueNumber]);
@@ -18,9 +18,10 @@ export default function CommentsList({ issueNumber, comments, setComments }) {
         headers
       });
       const data = await response.json();
-      setComments(data);
+      setComments(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error('Failed to load comments:', error);
+      setComments([]);
     } finally {
       setLoading(false);
     }
@@ -30,7 +31,7 @@ export default function CommentsList({ issueNumber, comments, setComments }) {
     return <div className="comment-card"><p>加载评论中...</p></div>;
   }
 
-  if (comments.length === 0) {
+  if (!comments || !Array.isArray(comments) || comments.length === 0) {
     return <div className="comment-card"><p>暂无评论，快来发表第一个评论。</p></div>;
   }
 

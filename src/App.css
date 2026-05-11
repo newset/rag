@@ -6,9 +6,9 @@
 }
 
 .site-header {
-  background: linear-gradient(180deg, rgba(30,41,59,0.95) 0%, rgba(15,23,42,0.9) 100%);
+  background: rgba(255,255,255,.72);
   border-bottom: 1px solid var(--border);
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(14px);
   padding: 20px;
   margin-bottom: 20px;
 }
@@ -52,7 +52,7 @@
 
 .site-nav a {
   color: var(--muted);
-  transition: color 0.3s ease;
+  transition: color 0.3s ease, background .3s ease;
   font-weight: 500;
   padding: 8px 12px;
   border-radius: 6px;
@@ -67,7 +67,7 @@
   margin-top: 40px;
   padding: 20px;
   border-top: 1px solid var(--border);
-  background: rgba(15, 23, 42, 0.96);
+  background: rgba(255, 255, 255, 0.9);
   text-align: center;
   color: var(--muted);
 }
@@ -96,3 +96,5 @@
 .page-container {
   padding: 20px;
 }
+
+.home-page .toolbar,.blog-page .blog-article,.comments-section,.post-card,.card{box-shadow:0 10px 30px rgba(103,92,255,.08);}

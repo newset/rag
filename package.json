@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@giscus/react": "^3.1.0",
     "aieditor": "^1.4.2",
     "marked": "^18.0.3",
     "react": "^18.2.0",

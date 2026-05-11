@@ -117,9 +117,8 @@ export default function App() {
           <header className="site-header">
             <div>
               <h1>
-                <Link to="/">RAG 博客</Link>
+                <Link to="/">NEWSET</Link>
               </h1>
-              <p>使用 GitHub Issue 作为文章，Label 作为标签，支持多种筛选和留言功能。</p>
             </div>
             <nav className="site-nav">
               <Link to="/">首页</Link>
@@ -141,7 +140,6 @@ export default function App() {
           </main>
 
           <footer className="site-footer">
-            <p>© 2024 RAG 博客 | 基于 <a href="https://github.com" target="_blank" rel="noreferrer">GitHub Issue</a></p>
           </footer>
         </div>
       </HashRouter>

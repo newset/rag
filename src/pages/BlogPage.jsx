@@ -1,5 +1,6 @@
 import { useParams } from 'react-router-dom';
 import { useState, useEffect } from 'react';
+import ReactMarkdown from 'react-markdown';
 import { useApp } from '../App';
 import CommentsList from '../components/CommentsList';
 import CommentForm from '../components/CommentForm';

@@ -65,6 +65,16 @@ input:focus, select:focus, textarea:focus { border-color: rgba(167,139,250,.55);
 .markdown-body th, .markdown-body td { border: 1px solid var(--border); padding: .6rem .8rem; }
 .markdown-body img { max-width: 100%; border-radius: 12px; }
 
+/* Mermaid 图表样式 */
+.markdown-body .mermaid {
+  text-align: center;
+  margin: 1rem 0;
+}
+.markdown-body .mermaid svg {
+  max-width: 100%;
+  height: auto;
+}
+
 .tag-hero { padding-top: 72px; padding-bottom: 34px; }
 .tag-hero .aura-tag { margin-bottom: 20px; }
 .tag-cloud { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 16px; padding-bottom: 80px; }

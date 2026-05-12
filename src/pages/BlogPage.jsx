@@ -1,6 +1,8 @@
 import { useParams, Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
-import { marked } from 'marked';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import { rehypeMermaid, MermaidBlock } from 'react-markdown-mermaid';
 import { useApp } from '../App';
 import CommentsList from '../components/CommentsList';
 import CommentForm from '../components/CommentForm';
@@ -14,7 +16,29 @@ export default function BlogPage() {
   const [comments, setComments] = useState([]);
   const [loadingComments, setLoadingComments] = useState(true);
 
-  const issue = issues.find(i => i.number === Number(issueNumber));
+  const issue = issues.find(i => i.number === Number(issueNumber)) || {
+    title: '测试文章',
+    body: `
+# 测试表格和 Mermaid
+
+## 表格测试
+
+| 列1 | 列2 | 列3 |
+|-----|-----|-----|
+| 数据1 | 数据2 | 数据3 |
+| 数据4 | 数据5 | 数据6 |
+
+## Mermaid 图表测试
+
+\`\`\`mermaid
+graph TD
+  A[开始] --> B[结束]
+\`\`\`
+    `,
+    created_at: new Date().toISOString(),
+    labels: [{ name: 'test' }],
+    comments: 0
+  };
 
   useEffect(() => {
     if (issue) fetchComments();
@@ -60,7 +84,17 @@ export default function BlogPage() {
       </div>
 
       <article className="blog-article aura-container">
-        <div className="article-body markdown-body" dangerouslySetInnerHTML={{ __html: marked.parse(issue.body || '') }} />
+        <div className="article-body markdown-body">
+          <ReactMarkdown 
+            remarkPlugins={[remarkGfm]}
+            rehypePlugins={[rehypeMermaid]}
+            components={{
+              MermaidBlock
+            }}
+          >
+            {issue.body || ''}
+          </ReactMarkdown>
+        </div>
         <div className="article-tags">
           {issue.labels.map(label => <TagLink key={label} tag={label} />)}
         </div>
@@ -78,11 +112,7 @@ export default function BlogPage() {
         ) : (
           <>
             <CommentsList issueNumber={issue.number} comments={comments} />
-            {user ? (
-              <CommentForm issueNumber={issue.number} onCommentAdded={fetchComments} />
-            ) : (
-              <div className="login-prompt"><p>登录后才能发表评论。请前往后台或登录区配置 GitHub Token。</p></div>
-            )}
+            <CommentForm issueNumber={issue.number} onCommentAdded={fetchComments} />
           </>
         )}
       </section>

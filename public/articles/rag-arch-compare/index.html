@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RAG 架构全景对比</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Sora:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  /* ── Dark mode tokens (default) ── */
+  :root {
+    --bg: #0a0c10;
+    --bg2: #0f1218;
+    --bg3: #151921;
+    --border: rgba(255,255,255,0.07);
+    --border2: rgba(255,255,255,0.12);
+    --text: #e8eaf0;
+    --muted: #6b7280;
+    --dim: #374151;
+    --code-bg: rgba(255,255,255,0.06);
+    --hover-row: rgba(255,255,255,0.02);
+    --td-dim: rgba(255,255,255,0.3);
+    --reco-special: rgba(255,255,255,0.03);
+    --header-grad1: rgba(96,165,250,0.06);
+    --header-grad2: rgba(167,139,250,0.05);
+
+    --vec:   #34d399; --vec-bg:   rgba(52,211,153,0.10);  --vec-border:  rgba(52,211,153,0.25);
+    --mcp:   #60a5fa; --mcp-bg:   rgba(96,165,250,0.10);  --mcp-border:  rgba(96,165,250,0.25);
+    --graph: #a78bfa; --graph-bg: rgba(167,139,250,0.10); --graph-border:rgba(167,139,250,0.25);
+    --sql:   #fbbf24; --sql-bg:   rgba(251,191,36,0.10);  --sql-border:  rgba(251,191,36,0.25);
+    --hyb:   #fb923c; --hyb-bg:   rgba(251,146,60,0.10);  --hyb-border:  rgba(251,146,60,0.25);
+    --agt:   #f472b6; --agt-bg:   rgba(244,114,182,0.10); --agt-border:  rgba(244,114,182,0.25);
+
+    --good: #34d399; --bad: #f87171; --mid: #f59e0b;
+    --radius: 12px;
+    --font: 'Sora', sans-serif;
+    --mono: 'DM Mono', monospace;
+  }
+
+  /* ── Light mode tokens ── */
+  @media (prefers-color-scheme: light) {
+    :root:not([data-theme="dark"]) {
+      --bg:  #f5f6f8;
+      --bg2: #ffffff;
+      --bg3: #eef0f3;
+      --border:  rgba(0,0,0,0.08);
+      --border2: rgba(0,0,0,0.14);
+      --text: #111318;
+      --muted: #6b7280;
+      --dim: #d1d5db;
+      --code-bg: rgba(0,0,0,0.05);
+      --hover-row: rgba(0,0,0,0.02);
+      --td-dim: rgba(0,0,0,0.35);
+      --reco-special: rgba(0,0,0,0.025);
+      --header-grad1: rgba(96,165,250,0.08);
+      --header-grad2: rgba(167,139,250,0.06);
+
+      --vec:   #059669; --vec-bg:   rgba(5,150,105,0.08);   --vec-border:  rgba(5,150,105,0.2);
+      --mcp:   #2563eb; --mcp-bg:   rgba(37,99,235,0.08);   --mcp-border:  rgba(37,99,235,0.2);
+      --graph: #7c3aed; --graph-bg: rgba(124,58,237,0.08);  --graph-border:rgba(124,58,237,0.2);
+      --sql:   #b45309; --sql-bg:   rgba(180,83,9,0.08);    --sql-border:  rgba(180,83,9,0.2);
+      --hyb:   #c2410c; --hyb-bg:   rgba(194,65,12,0.08);   --hyb-border:  rgba(194,65,12,0.2);
+      --agt:   #be185d; --agt-bg:   rgba(190,24,93,0.08);   --agt-border:  rgba(190,24,93,0.2);
+
+      --good: #059669; --bad: #dc2626; --mid: #b45309;
+    }
+  }
+
+  /* ── Manual dark override ── */
+  [data-theme="dark"] {
+    --bg: #0a0c10; --bg2: #0f1218; --bg3: #151921;
+    --border: rgba(255,255,255,0.07); --border2: rgba(255,255,255,0.12);
+    --text: #e8eaf0; --muted: #6b7280; --dim: #374151;
+    --code-bg: rgba(255,255,255,0.06); --hover-row: rgba(255,255,255,0.02);
+    --td-dim: rgba(255,255,255,0.3); --reco-special: rgba(255,255,255,0.03);
+    --header-grad1: rgba(96,165,250,0.06); --header-grad2: rgba(167,139,250,0.05);
+    --vec:#34d399;--vec-bg:rgba(52,211,153,0.10);--vec-border:rgba(52,211,153,0.25);
+    --mcp:#60a5fa;--mcp-bg:rgba(96,165,250,0.10);--mcp-border:rgba(96,165,250,0.25);
+    --graph:#a78bfa;--graph-bg:rgba(167,139,250,0.10);--graph-border:rgba(167,139,250,0.25);
+    --sql:#fbbf24;--sql-bg:rgba(251,191,36,0.10);--sql-border:rgba(251,191,36,0.25);
+    --hyb:#fb923c;--hyb-bg:rgba(251,146,60,0.10);--hyb-border:rgba(251,146,60,0.25);
+    --agt:#f472b6;--agt-bg:rgba(244,114,182,0.10);--agt-border:rgba(244,114,182,0.25);
+    --good:#34d399;--bad:#f87171;--mid:#f59e0b;
+  }
+
+  /* ── Manual light override ── */
+  [data-theme="light"] {
+    --bg:#f5f6f8;--bg2:#ffffff;--bg3:#eef0f3;
+    --border:rgba(0,0,0,0.08);--border2:rgba(0,0,0,0.14);
+    --text:#111318;--muted:#6b7280;--dim:#d1d5db;
+    --code-bg:rgba(0,0,0,0.05);--hover-row:rgba(0,0,0,0.02);
+    --td-dim:rgba(0,0,0,0.35);--reco-special:rgba(0,0,0,0.025);
+    --header-grad1:rgba(96,165,250,0.08);--header-grad2:rgba(167,139,250,0.06);
+    --vec:#059669;--vec-bg:rgba(5,150,105,0.08);--vec-border:rgba(5,150,105,0.2);
+    --mcp:#2563eb;--mcp-bg:rgba(37,99,235,0.08);--mcp-border:rgba(37,99,235,0.2);
+    --graph:#7c3aed;--graph-bg:rgba(124,58,237,0.08);--graph-border:rgba(124,58,237,0.2);
+    --sql:#b45309;--sql-bg:rgba(180,83,9,0.08);--sql-border:rgba(180,83,9,0.2);
+    --hyb:#c2410c;--hyb-bg:rgba(194,65,12,0.08);--hyb-border:rgba(194,65,12,0.2);
+    --agt:#be185d;--agt-bg:rgba(190,24,93,0.08);--agt-border:rgba(190,24,93,0.2);
+    --good:#059669;--bad:#dc2626;--mid:#b45309;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font);
+    font-size: 14px;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* ── Header ── */
+  header {
+    padding: 60px 40px 40px;
+    border-bottom: 1px solid var(--border);
+    position: relative;
+    overflow: hidden;
+  }
+  header::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 60% 80% at 0% 0%, rgba(96,165,250,0.06) 0%, transparent 60%),
+      radial-gradient(ellipse 50% 60% at 100% 100%, rgba(167,139,250,0.05) 0%, transparent 60%);
+    pointer-events: none;
+  }
+  .header-tag {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: .12em;
+    color: var(--muted);
+    border: 1px solid var(--border2);
+    padding: 4px 12px;
+    border-radius: 4px;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+  }
+  h1 {
+    font-size: clamp(28px, 4vw, 48px);
+    font-weight: 600;
+    letter-spacing: -0.03em;
+    line-height: 1.15;
+    margin-bottom: 14px;
+  }
+  h1 span { color: var(--muted); }
+  .header-desc {
+    color: var(--muted);
+    font-size: 15px;
+    max-width: 560px;
+    font-weight: 300;
+  }
+
+  /* ── Layout ── */
+  main { padding: 40px; max-width: 1280px; margin: 0 auto; }
+  section { margin-bottom: 56px; }
+  .section-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: .1em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* ── Cards grid ── */
+  .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 16px; }
+
+  .card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    transition: border-color .2s, transform .2s;
+    cursor: default;
+  }
+  .card:hover { border-color: var(--border2); transform: translateY(-2px); }
+
+  .card-header {
+    padding: 20px 22px 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+  }
+  .card-icon {
+    width: 38px; height: 38px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    font-size: 17px;
+  }
+  .card-title { font-size: 15px; font-weight: 500; margin-bottom: 5px; }
+  .card-desc { font-size: 12px; color: var(--muted); line-height: 1.55; }
+
+  .badges { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; }
+  .badge {
+    font-family: var(--mono);
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    letter-spacing: .04em;
+  }
+
+  .card-body { display: grid; grid-template-columns: 1fr 1fr; }
+  .col { padding: 16px 22px; }
+  .col:first-child { border-right: 1px solid var(--border); }
+  .col-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: .1em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  .item { display: flex; gap: 7px; align-items: flex-start; margin-bottom: 7px; font-size: 12.5px; color: var(--muted); line-height: 1.5; }
+  .item:last-child { margin-bottom: 0; }
+  .dot { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; margin-top: 5px; }
+
+  .flow-row {
+    padding: 12px 22px;
+    border-top: 1px solid var(--border);
+    background: var(--bg3);
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    line-height: 1.7;
+  }
+  .flow-row code {
+    color: var(--text);
+    background: var(--code-bg);
+    padding: 1px 5px;
+    border-radius: 3px;
+  }
+
+  .use-row {
+    padding: 11px 22px;
+    border-top: 1px solid var(--border);
+    display: flex; flex-wrap: wrap; gap: 5px; align-items: center;
+  }
+  .use-label { font-family: var(--mono); font-size: 10px; color: var(--muted); letter-spacing: .06em; }
+
+  /* ── Color themes ── */
+  .c-vec  { color: var(--vec);   background: var(--vec-bg);   border-color: var(--vec-border);   }
+  .c-mcp  { color: var(--mcp);   background: var(--mcp-bg);   border-color: var(--mcp-border);   }
+  .c-graph{ color: var(--graph); background: var(--graph-bg); border-color: var(--graph-border); }
+  .c-sql  { color: var(--sql);   background: var(--sql-bg);   border-color: var(--sql-border);   }
+  .c-hyb  { color: var(--hyb);   background: var(--hyb-bg);   border-color: var(--hyb-border);   }
+  .c-agt  { color: var(--agt);   background: var(--agt-bg);   border-color: var(--agt-border);   }
+
+  .icon-vec  { background: var(--vec-bg);   border: 1px solid var(--vec-border);   color: var(--vec);   }
+  .icon-mcp  { background: var(--mcp-bg);   border: 1px solid var(--mcp-border);   color: var(--mcp);   }
+  .icon-graph{ background: var(--graph-bg); border: 1px solid var(--graph-border); color: var(--graph); }
+  .icon-sql  { background: var(--sql-bg);   border: 1px solid var(--sql-border);   color: var(--sql);   }
+  .icon-hyb  { background: var(--hyb-bg);   border: 1px solid var(--hyb-border);   color: var(--hyb);   }
+  .icon-agt  { background: var(--agt-bg);   border: 1px solid var(--agt-border);   color: var(--agt);   }
+
+  /* ── Table ── */
+  .table-wrap {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  th {
+    background: var(--bg3);
+    padding: 12px 16px;
+    text-align: left;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: .08em;
+    color: var(--muted);
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--border);
+    font-weight: 400;
+    white-space: nowrap;
+  }
+  td {
+    padding: 11px 16px;
+    border-bottom: 1px solid var(--border);
+    color: var(--muted);
+    vertical-align: middle;
+    line-height: 1.4;
+  }
+  tr:last-child td { border-bottom: none; }
+  td:first-child {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--td-dim);
+    letter-spacing: .04em;
+    white-space: nowrap;
+  }
+  tr:hover td { background: var(--hover-row); }
+
+  .cell-good { color: var(--good); font-weight: 500; }
+  .cell-mid  { color: var(--mid);  }
+  .cell-bad  { color: var(--bad);  }
+  .cell-dot  {
+    display: inline-flex; align-items: center; gap: 5px;
+  }
+
+  /* ── Legend ── */
+  .legend {
+    display: flex; flex-wrap: wrap; gap: 20px;
+    margin-top: 12px;
+    padding: 14px 18px;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+  }
+  .legend-item { display: flex; align-items: center; gap: 7px; font-family: var(--mono); font-size: 11px; color: var(--muted); }
+  .legend-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+  /* ── Recommendation ── */
+  .reco {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px 28px;
+  }
+  .reco-title { font-size: 13px; font-weight: 500; margin-bottom: 14px; color: var(--text); }
+  .reco-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; }
+  .reco-item {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 14px;
+  }
+  .reco-q { font-size: 12px; color: var(--muted); margin-bottom: 6px; }
+  .reco-a { font-size: 13px; font-weight: 500; }
+
+  /* ── Animations ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .card { animation: fadeUp .4s ease both; }
+  .card:nth-child(1){animation-delay:.05s}
+  .card:nth-child(2){animation-delay:.10s}
+  .card:nth-child(3){animation-delay:.15s}
+  .card:nth-child(4){animation-delay:.20s}
+  .card:nth-child(5){animation-delay:.25s}
+  .card:nth-child(6){animation-delay:.30s}
+
+  /* ── Scrollbar ── */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--dim); border-radius: 3px; }
+
+  .overflow-x { overflow-x: auto; }
+
+  @media (max-width: 640px) {
+    header { padding: 36px 20px 28px; }
+    main { padding: 24px 16px; }
+    .cards { grid-template-columns: 1fr; }
+    .card-body { grid-template-columns: 1fr; }
+    .col:first-child { border-right: none; border-bottom: 1px solid var(--border); }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div style="max-width:1280px;margin:0 auto;position:relative">
+    <button id="theme-toggle" onclick="toggleTheme()" title="切换主题" style="
+      position:absolute;top:0;right:0;
+      display:flex;align-items:center;gap:7px;
+      background:var(--bg2);border:1px solid var(--border2);
+      color:var(--muted);font-family:var(--mono);font-size:11px;
+      letter-spacing:.06em;padding:6px 14px;border-radius:6px;
+      cursor:pointer;transition:all .2s;
+    " onmouseover="this.style.borderColor='var(--border2)';this.style.color='var(--text)'"
+       onmouseout="this.style.color='var(--muted)'">
+      <span id="theme-icon">☀</span>
+      <span id="theme-label">LIGHT</span>
+    </button>
+    <div class="header-tag">Architecture Comparison</div>
+    <h1>RAG 架构<br><span>全景对比</span></h1>
+    <p class="header-desc">六种主流检索增强生成架构的能力边界、工程权衡与适用场景</p>
+  </div>
+</header>
+
+<main>
+
+  <!-- Cards -->
+  <section>
+    <div class="section-label">架构详解</div>
+    <div class="cards">
+
+      <!-- 1. Vector RAG -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon icon-vec">⬡</div>
+          <div>
+            <div class="card-title" style="color:var(--vec)">向量数据库 RAG</div>
+            <div class="card-desc">文档 Embedding 后存入向量库，用余弦 / ANN 语义相似度检索 Top-K 片段</div>
+            <div class="badges">
+              <span class="badge c-vec">语义搜索</span>
+              <span class="badge c-vec">大规模文档</span>
+              <span class="badge c-vec">低延迟</span>
+            </div>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="col">
+            <div class="col-label">优势</div>
+            <div class="item"><span class="dot" style="background:var(--good)"></span><span>同义 / 近义表达均可召回，语义理解强</span></div>
+            <div class="item"><span class="dot" style="background:var(--good)"></span><span>ANN 索引毫秒级返回，延迟低</span></div>
+            <div class="item"><span class="dot" style="background:var(--good)"></span><span>支持亿级 chunk 规模</span></div>
+            <div class="item"><span class="dot" style="background:var(--good)"></span><span>离线可用，不依赖外部服务</span></div>
+          </div>
+          <div class="col">
+            <div class="col-label">劣势</div>
+            <div class="item"><span class="dot" style="background:var(--bad)"></span><span>知识有时效性，更新需重新索引</span></div>
+            <div class="item"><span class="dot" style="background:var(--bad)"></span><span>精确 ID / 数字召回弱</span></div>
+            <div class="item"><span class="dot" style="background:var(--bad)"></span><span>多跳推理能力差</span></div>
+            <div class="item"><span class="dot" style="background:var(--bad)"></span><span>领域外 Embedding 质量下降</span></div>
+          </div>
+        </div>
+        <div class="flow-row">文档 → <code>Embed</code> → 向量库 → 查询向量 → <code>Top-K ANN</code> → LLM → 回答</div>
+        <div class="use-row">
+          <span class="use-label">适合&nbsp;/&nbsp;</span>
+          <span class="badge c-vec">研报问答</span>
+          <span class="badge c-vec">策略知识库</span>
+          <span class="badge c-vec">客服 FAQ</span>
+          <span class="badge c-vec">代码语义搜索</span>
+        </div>
+      </div>
+
+      <!-- 2. MCP RAG -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon icon-mcp">⚙</div>
+          <div>
+            <div class="card-title" style="color:var(--mcp)">MCP RAG</div>
+            <div class="card-desc">LLM 通过 Model Context Protocol 工具调用实时获取外部数据，支持读写操作</div>
+            <div class="badges">
+              <span class="badge c-mcp">实时数据</span>
+              <span class="badge c-mcp">可写操作</span>
+              <span class="badge c-mcp">结构化查询</span>
+            </div>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="col">
+            <div class="col-label">优势</div>
+            <div class="item"><span class="dot" style="background:var(--good)"></span><span>直连数据源，数据永远最新</span></div>
+            <div class="item"><span class="dot" style="background:var(--good)"></span><span>支持写入、触发操作，不只是读</span></div>
+            <div class="item"><span class="dot" style="background:var(--good)"></span><span>精确条件过滤与聚合计算</span></div>
+            <div class="item"><span class="dot" style="background:var(--good)"></span><span>无需维护向量索引</span></div>
+          </div>
+          <div class="col">
+            <div class="col-label">劣势</div>
+            <div class="item"><span class="dot" style="background:var(--bad)"></span><span>语义模糊查询能力弱</span></div>
+            <div class="item"><span class="dot" style="background:var(--bad)"></span><span>延迟高，依赖工具可用性</span></div>
+            <div class="item"><span class="dot" style="background:var(--bad)"></span><span>每个数据源需开发 MCP 接口</span></div>
+            <div class="item"><span class="dot" style="background:var(--bad)"></span><span>权限管理复杂度高</span></div>
+          </div>
+        </div>
+        <div class="flow-row">提问 → LLM 选择工具 → <code>MCP Tool</code> → 数据源 → 结果 → LLM → 回答</div>
+        <div class="use-row">
+          <span class="use-label">适合&nbsp;/&nbsp;</span>
+          <span class="badge c-mcp">行情查询</span>
+          <span class="badge c-mcp">实时持仓</span>
+          <span class="badge c-mcp">日历操作</span>
+          <span class="badge c-mcp">CRM 写入</span>
+        </div>
+      </div>
+
+      <!-- 3. Graph RAG -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon icon-graph">◈</div>
+          <div>
+            <div class="card-title" style="color:var(--graph)">图谱 RAG（GraphRAG）</div>
+            <div class="card-desc">将文档解析为知识图谱（实体＋关系），通过图遍历做多跳推理和关联检索</div>
+            <div class="badges">
+              <span class="badge c-graph">多跳推理</span>
+              <span class="badge c-graph">关系检索</span>
+              <span class="badge c-graph">结构化知识</span>
+            </div>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="col">
+            <div class="col-label">优势</div>
+            <div class="item"><span class="dot" style="background:var(--good)"></span><span>擅长多跳推理（A→B→C 关系链）</span></div>
+            <div class="item"><span class="dot" style="background:var(--good)"></span><span>实体关系查询准确，不靠语义相似</span></div>
+            <div class="item"><span class="dot" style="background:var(--good)"></span><span>全局摘要能力强，跨文档关联</span></div>
+            <div class="item"><span class="dot" style="background:var(--good)"></span><span>适合医疗、法律等知识密集型领域</span></div>
+          </div>
+          <div class="col">
+            <div class="col-label">劣势</div>
+            <div class="item"><span class="dot" style="background:var(--bad)"></span><span>图谱构建成本高，需 NER + 关系抽取</span></div>
+            <div class="item"><span class="dot" style="background:var(--bad)"></span><span>非结构化文本转图谱质量参差不齐</span></div>
+            <div class="item"><span class="dot" style="background:var(--bad)"></span><span>维护更新复杂，存在图谱腐烂问题</span></div>
+            <div class="item"><span class="dot" style="background:var(--bad)"></span><span>工程难度高，工具链不成熟</span></div>
+          </div>
+        </div>
+        <div class="flow-row">文档 → <code>NER+关系抽取</code> → 图谱 → <code>图遍历/Cypher</code> → 子图 → LLM → 回答</div>
+        <div class="use-row">
+          <span class="use-label">适合&nbsp;/&nbsp;</span>
+          <span class="badge c-graph">医药知识库</span>
+          <span class="badge c-graph">法律条文推理</span>
+          <span class="badge c-graph">供应链关联分析</span>
+        </div>
+      </div>
+
+      <!-- 4. SQL RAG -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon icon-sql">⊞</div>
+          <div>
+            <div class="card-title" style="color:var(--sql)">SQL RAG（Text-to-SQL）</div>
+            <div class="card-desc">LLM 将自然语言转为 SQL，直接查询结构化数据库，返回精确数据</div>
+            <div class="badges">
+              <span class="badge c-sql">精确查询</span>
+              <span class="badge c-sql">结构化数据</span>
+              <span class="badge c-sql">聚合分析</span>
+            </div>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="col">
+            <div class="col-label">优势</div>
+            <div class="item"><span class="dot" style="background:var(--good)"></span><span>精确数值、聚合、排名查询无敌</span></div>
+            <div class="item"><span class="dot" style="background:var(--good)"></span><span>数据实时，无需建索引</span></div>
+            <div class="item"><span class="dot" style="background:var(--good)"></span><span>结果可解释，SQL 可审计</span></div>
+            <div class="item"><span class="dot" style="background:var(--good)"></span><span>已有 DB 直接复用，零新存储成本</span></div>
+          </div>
+          <div class="col">
+            <div class="col-label">劣势</div>
+            <div class="item"><span class="dot" style="background:var(--bad)"></span><span>SQL 生成可能出错，需验证层</span></div>
+            <div class="item"><span class="dot" style="background:var(--bad)"></span><span>只适用于结构化数据，文本检索弱</span></div>
+            <div class="item"><span class="dot" style="background:var(--bad)"></span><span>复杂 JOIN / 子查询生成质量不稳</span></div>
+            <div class="item"><span class="dot" style="background:var(--bad)"></span><span>暴露 schema 带来安全风险</span></div>
+          </div>
+        </div>
+        <div class="flow-row">提问 → LLM 生成 <code>SQL</code> → 执行引擎 → 结果集 → LLM 格式化 → 回答</div>
+        <div class="use-row">
+          <span class="use-label">适合&nbsp;/&nbsp;</span>
+          <span class="badge c-sql">量化数据分析</span>
+          <span class="badge c-sql">财务报表</span>
+          <span class="badge c-sql">持仓 P&L 统计</span>
+          <span class="badge c-sql">BI 自然语言</span>
+        </div>
+      </div>
+
+      <!-- 5. Hybrid RAG -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon icon-hyb">⊕</div>
+          <div>
+            <div class="card-title" style="color:var(--hyb)">混合检索 RAG（Hybrid RAG）</div>
+            <div class="card-desc">稠密向量检索（语义）与稀疏检索（BM25 关键词）融合，互补召回后 Rerank</div>
+            <div class="badges">
+              <span class="badge c-hyb">语义+关键词</span>
+              <span class="badge c-hyb">Reranker</span>
+              <span class="badge c-hyb">召回率高</span>
+            </div>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="col">
+            <div class="col-label">优势</div>
+            <div class="item"><span class="dot" style="background:var(--good)"></span><span>召回率远高于单一方式</span></div>
+            <div class="item"><span class="dot" style="background:var(--good)"></span><span>关键词精确匹配 + 语义模糊双保险</span></div>
+            <div class="item"><span class="dot" style="background:var(--good)"></span><span>Reranker 提升精排质量</span></div>
+            <div class="item"><span class="dot" style="background:var(--good)"></span><span>当前生产环境最常用方案</span></div>
+          </div>
+          <div class="col">
+            <div class="col-label">劣势</div>
+            <div class="item"><span class="dot" style="background:var(--bad)"></span><span>架构复杂，需维护两套索引</span></div>
+            <div class="item"><span class="dot" style="background:var(--bad)"></span><span>两路并行 + 重排延迟略高</span></div>
+            <div class="item"><span class="dot" style="background:var(--bad)"></span><span>融合权重调优需经验</span></div>
+            <div class="item"><span class="dot" style="background:var(--mid)"></span><span>仍不擅长多跳推理和实时数据</span></div>
+          </div>
+        </div>
+        <div class="flow-row">查询 → <code>Dense</code>+<code>Sparse</code> 并行 → <code>RRF 融合</code> → <code>Reranker</code> → LLM → 回答</div>
+        <div class="use-row">
+          <span class="use-label">适合&nbsp;/&nbsp;</span>
+          <span class="badge c-hyb">企业知识库</span>
+          <span class="badge c-hyb">技术文档搜索</span>
+          <span class="badge c-hyb">电商商品检索</span>
+        </div>
+      </div>
+
+      <!-- 6. Agentic RAG -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon icon-agt">✦</div>
+          <div>
+            <div class="card-title" style="color:var(--agt)">Agentic RAG</div>
+            <div class="card-desc">Agent 自主规划检索策略，动态决定调用哪些工具、迭代几轮，支持复杂多步推理</div>
+            <div class="badges">
+              <span class="badge c-agt">自主规划</span>
+              <span class="badge c-agt">多工具编排</span>
+              <span class="badge c-agt">迭代推理</span>
+            </div>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="col">
+            <div class="col-label">优势</div>
+            <div class="item"><span class="dot" style="background:var(--good)"></span><span>能处理上述所有架构解决不了的复杂问题</span></div>
+            <div class="item"><span class="dot" style="background:var(--good)"></span><span>动态选择最优检索路径，自适应</span></div>
+            <div class="item"><span class="dot" style="background:var(--good)"></span><span>可迭代验证、自我纠错</span></div>
+            <div class="item"><span class="dot" style="background:var(--good)"></span><span>是以上所有架构的编排层</span></div>
+          </div>
+          <div class="col">
+            <div class="col-label">劣势</div>
+            <div class="item"><span class="dot" style="background:var(--bad)"></span><span>延迟最高，多轮工具调用叠加</span></div>
+            <div class="item"><span class="dot" style="background:var(--bad)"></span><span>成本高，Token 消耗大</span></div>
+            <div class="item"><span class="dot" style="background:var(--bad)"></span><span>行为不可预测，调试难度高</span></div>
+            <div class="item"><span class="dot" style="background:var(--bad)"></span><span>需要强大 LLM，弱模型乱规划</span></div>
+          </div>
+        </div>
+        <div class="flow-row">提问 → Agent 规划 → 选工具(向量/SQL/MCP/图谱…) → 执行 → 评估 → 迭代 → 汇总</div>
+        <div class="use-row">
+          <span class="use-label">适合&nbsp;/&nbsp;</span>
+          <span class="badge c-agt">多源复杂分析</span>
+          <span class="badge c-agt">AI 研究助手</span>
+          <span class="badge c-agt">交易策略生成</span>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Comparison Table -->
+  <section>
+    <div class="section-label">维度对比矩阵</div>
+    <div class="table-wrap overflow-x">
+      <table>
+        <thead>
+          <tr>
+            <th style="min-width:120px">维度</th>
+            <th style="color:var(--vec)">向量 RAG</th>
+            <th style="color:var(--mcp)">MCP RAG</th>
+            <th style="color:var(--graph)">图谱 RAG</th>
+            <th style="color:var(--sql)">SQL RAG</th>
+            <th style="color:var(--hyb)">混合检索</th>
+            <th style="color:var(--agt)">Agentic</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>数据新鲜度</td>
+            <td class="cell-mid">准实时</td>
+            <td class="cell-good">实时</td>
+            <td class="cell-mid">准实时</td>
+            <td class="cell-good">实时</td>
+            <td class="cell-mid">准实时</td>
+            <td class="cell-good">取决子工具</td>
+          </tr>
+          <tr>
+            <td>语义理解</td>
+            <td class="cell-good">强</td>
+            <td class="cell-bad">弱</td>
+            <td class="cell-mid">中</td>
+            <td class="cell-bad">弱</td>
+            <td class="cell-good">最强</td>
+            <td class="cell-good">强</td>
+          </tr>
+          <tr>
+            <td>精确查询</td>
+            <td class="cell-bad">弱</td>
+            <td class="cell-good">强</td>
+            <td class="cell-mid">中</td>
+            <td class="cell-good">最强</td>
+            <td class="cell-mid">中</td>
+            <td class="cell-good">强</td>
+          </tr>
+          <tr>
+            <td>多跳推理</td>
+            <td class="cell-bad">弱</td>
+            <td class="cell-bad">弱</td>
+            <td class="cell-good">最强</td>
+            <td class="cell-bad">弱</td>
+            <td class="cell-bad">弱</td>
+            <td class="cell-good">强</td>
+          </tr>
+          <tr>
+            <td>写操作支持</td>
+            <td class="cell-bad">✕</td>
+            <td class="cell-good">✓</td>
+            <td class="cell-bad">✕</td>
+            <td class="cell-mid">有限</td>
+            <td class="cell-bad">✕</td>
+            <td class="cell-good">✓</td>
+          </tr>
+          <tr>
+            <td>检索延迟</td>
+            <td class="cell-good">低 10–50ms</td>
+            <td class="cell-mid">中高 100ms+</td>
+            <td class="cell-mid">中</td>
+            <td class="cell-mid">中</td>
+            <td class="cell-mid">中</td>
+            <td class="cell-bad">高（多轮）</td>
+          </tr>
+          <tr>
+            <td>工程复杂度</td>
+            <td class="cell-good">低</td>
+            <td class="cell-mid">中</td>
+            <td class="cell-bad">高</td>
+            <td class="cell-mid">中</td>
+            <td class="cell-mid">中</td>
+            <td class="cell-bad">最高</td>
+          </tr>
+          <tr>
+            <td>适合数据类型</td>
+            <td>非结构化文本</td>
+            <td>任意（API）</td>
+            <td>关系型知识</td>
+            <td>结构化表格</td>
+            <td>混合文本</td>
+            <td>全类型</td>
+          </tr>
+          <tr>
+            <td>典型工具</td>
+            <td>Chroma / Pinecone / Weaviate</td>
+            <td>MCP Server</td>
+            <td>Neo4j / LlamaIndex</td>
+            <td>Vanna / DAIL-SQL</td>
+            <td>ES 8.x / Weaviate</td>
+            <td>LangGraph / AutoGen</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="legend">
+      <div class="legend-item"><span class="legend-dot" style="background:var(--good)"></span>强 / 是 / 低</div>
+      <div class="legend-item"><span class="legend-dot" style="background:var(--mid)"></span>中等 / 有限</div>
+      <div class="legend-item"><span class="legend-dot" style="background:var(--bad)"></span>弱 / 否 / 高</div>
+    </div>
+  </section>
+
+  <!-- Decision guide -->
+  <section>
+    <div class="section-label">选型决策参考</div>
+    <div class="reco">
+      <div class="reco-title">根据核心需求选架构</div>
+      <div class="reco-grid">
+        <div class="reco-item">
+          <div class="reco-q">需要语义搜索大量文档？</div>
+          <div class="reco-a" style="color:var(--vec)">→ 向量 RAG</div>
+        </div>
+        <div class="reco-item">
+          <div class="reco-q">需要操作实时数据或写入？</div>
+          <div class="reco-a" style="color:var(--mcp)">→ MCP RAG</div>
+        </div>
+        <div class="reco-item">
+          <div class="reco-q">需要多跳关系推理？</div>
+          <div class="reco-a" style="color:var(--graph)">→ 图谱 RAG</div>
+        </div>
+        <div class="reco-item">
+          <div class="reco-q">需要精确统计聚合分析？</div>
+          <div class="reco-a" style="color:var(--sql)">→ SQL RAG</div>
+        </div>
+        <div class="reco-item">
+          <div class="reco-q">追求最高召回率？</div>
+          <div class="reco-a" style="color:var(--hyb)">→ 混合检索</div>
+        </div>
+        <div class="reco-item">
+          <div class="reco-q">需要处理跨源复杂问题？</div>
+          <div class="reco-a" style="color:var(--agt)">→ Agentic RAG</div>
+        </div>
+        <div class="reco-item" style="grid-column:1/-1;background:var(--reco-special)">
+          <div class="reco-q">交易平台最优实践</div>
+          <div class="reco-a" style="font-size:12px;font-weight:400;color:var(--muted);margin-top:4px">
+            向量 RAG（策略文档）＋ MCP RAG（实时行情/持仓）＋ SQL RAG（历史统计）→ Agentic 编排
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer style="border-top:1px solid var(--border);padding:24px 40px;text-align:center">
+  <span style="font-family:var(--mono);font-size:11px;color:var(--dim)">RAG Architecture Comparison · 2025</span>
+</footer>
+<script>
+  const html = document.documentElement;
+  const icon = document.getElementById('theme-icon');
+  const label = document.getElementById('theme-label');
+  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+  let current = localStorage.getItem('rag-theme') || (prefersDark ? 'dark' : 'light');
+  applyTheme(current);
+
+  function applyTheme(t) {
+    current = t;
+    html.setAttribute('data-theme', t);
+    localStorage.setItem('rag-theme', t);
+    if (t === 'dark') {
+      icon.textContent = '☀';
+      label.textContent = 'LIGHT';
+    } else {
+      icon.textContent = '☾';
+      label.textContent = 'DARK';
+    }
+  }
+
+  function toggleTheme() {
+    applyTheme(current === 'dark' ? 'light' : 'dark');
+  }
+</script>
+</body>
+</html>

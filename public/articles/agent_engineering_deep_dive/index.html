@@ -1,0 +1,270 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Agent 工程化深度解析</title>
+<style>
+:root{
+  --bg:#f6f8fb;--panel:#ffffff;--text:#172033;--muted:#5f6b7a;--line:#dce3ee;
+  --brand:#2563eb;--brand2:#7c3aed;--ok:#059669;--warn:#d97706;--danger:#dc2626;
+  --code:#0f172a;--soft:#eef4ff;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.72}
+a{color:var(--brand);text-decoration:none} a:hover{text-decoration:underline}
+.layout{display:grid;grid-template-columns:280px 1fr;min-height:100vh}
+.sidebar{position:sticky;top:0;height:100vh;padding:24px 18px;background:#0f172a;color:#fff;overflow:auto}
+.sidebar h2{font-size:18px;margin:0 0 14px}
+.sidebar .hint{font-size:12px;color:#b8c2d6;margin-bottom:16px}
+.sidebar input{width:100%;border:1px solid #334155;border-radius:12px;background:#111827;color:#fff;padding:10px 12px;margin:8px 0 16px}
+.sidebar nav a{display:block;color:#dbeafe;padding:8px 10px;border-radius:10px;font-size:14px}
+.sidebar nav a:hover{background:#1e293b;text-decoration:none}
+main{max-width:1120px;padding:42px 48px 80px}
+.hero{background:linear-gradient(135deg,#2563eb,#7c3aed);color:#fff;border-radius:28px;padding:34px 36px;box-shadow:0 20px 50px rgba(37,99,235,.18)}
+.hero h1{font-size:34px;line-height:1.2;margin:0 0 10px}
+.hero p{margin:0;color:#eaf1ff}
+.badges{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+.badge{border:1px solid rgba(255,255,255,.32);background:rgba(255,255,255,.14);padding:6px 10px;border-radius:999px;font-size:13px}
+section{margin-top:28px;background:var(--panel);border:1px solid var(--line);border-radius:24px;padding:28px;box-shadow:0 8px 28px rgba(15,23,42,.05)}
+h2{font-size:26px;margin:0 0 16px} h3{font-size:19px;margin:22px 0 10px}
+.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.grid.two{grid-template-columns:repeat(2,minmax(0,1fr))}
+.card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:18px}
+.card h3{margin-top:0}
+.flow{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin:18px 0}
+.step{background:var(--soft);border:1px solid #c9d8ff;border-radius:16px;padding:14px;text-align:center;font-weight:650}
+.step small{display:block;color:var(--muted);font-weight:400}
+table{width:100%;border-collapse:collapse;margin:12px 0;background:#fff;border-radius:16px;overflow:hidden}
+th,td{border-bottom:1px solid var(--line);padding:12px 14px;text-align:left;vertical-align:top}
+th{background:#f1f5f9}
+pre{background:var(--code);color:#e2e8f0;padding:18px;border-radius:18px;overflow:auto}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono",monospace}
+details{border:1px solid var(--line);border-radius:16px;background:#fff;margin:12px 0;padding:14px 16px}
+summary{cursor:pointer;font-weight:700}
+.callout{border-left:5px solid var(--brand);background:#f8fbff;padding:14px 16px;border-radius:14px;margin:14px 0}
+.warn{border-left-color:var(--warn);background:#fff8ed}.ok{border-left-color:var(--ok);background:#f0fdf4}
+.tag{display:inline-block;background:#eef2ff;color:#3730a3;border-radius:999px;padding:3px 9px;font-size:12px;margin:2px}
+.checklist li{margin:8px 0}
+.kbd{background:#f1f5f9;border:1px solid #cbd5e1;border-bottom-width:2px;border-radius:6px;padding:1px 6px}
+.footer{color:var(--muted);font-size:13px;margin-top:22px}
+@media(max-width:900px){.layout{grid-template-columns:1fr}.sidebar{position:relative;height:auto}.grid,.grid.two,.flow{grid-template-columns:1fr}main{padding:20px}}
+</style>
+</head>
+<body>
+<div class="layout">
+<aside class="sidebar">
+  <h2>Agent 工程化深度解析</h2>
+  <div class="hint">输入关键词可过滤正文模块</div>
+  <input id="searchBox" placeholder="搜索：chunk / rerank / tool..." />
+  <nav><a href="#overview">1. Agent 本质</a>
+<a href="#loop">2. ReAct 循环</a>
+<a href="#tool">3. 工具调用</a>
+<a href="#memory">4. 记忆管理</a>
+<a href="#planning">5. 任务规划</a>
+<a href="#security">6. 安全边界</a>
+<a href="#go">7. Go 落地</a>
+<a href="#interview">8. 面试题</a>
+<a href="#refs">9. 学习资料</a></nav>
+</aside>
+<main>
+
+<div class="hero">
+  <h1>Agent 工程化深度解析</h1>
+  <p>围绕智能体的核心循环、工具调用、记忆管理、任务规划、容错机制与 Go 工程落地展开，适合准备 Agent 面试或设计业务自动化 Agent。</p>
+  <div class="badges"><span class="badge">ReAct Loop</span><span class="badge">Tool Calling</span><span class="badge">Memory</span><span class="badge">Go 工程化</span></div>
+</div>
+
+<section id="overview">
+<h2>1. Agent 的本质</h2>
+<p>文章中把 Agent 的核心归纳为三块：<strong>怎么规划、怎么用工具、怎么记东西</strong>。这可以进一步扩展为：</p>
+<div class="grid">
+  <div class="card"><h3>Planning</h3><p>把用户目标拆成可执行步骤，决定先做什么、后做什么。</p></div>
+  <div class="card"><h3>Tool Use</h3><p>通过函数调用、API、数据库、搜索、文件系统等工具与外部世界交互。</p></div>
+  <div class="card"><h3>Memory</h3><p>管理短期上下文和长期经验，避免每轮都从零开始。</p></div>
+</div>
+<p>与普通 ChatBot 不同，Agent 不是只回答问题，而是能围绕目标循环执行：观察、思考、行动、验证、继续行动。</p>
+</section>
+
+<section id="loop">
+<h2>2. Agent 核心循环：ReAct</h2>
+<p>ReAct = Reason + Act。工程上通常是一个循环：</p>
+<div class="flow">
+  <div class="step">1. 输入目标<small>User Goal</small></div>
+  <div class="step">2. 模型思考<small>Reason</small></div>
+  <div class="step">3. 选择工具<small>Act</small></div>
+  <div class="step">4. 接收结果<small>Observation</small></div>
+  <div class="step">5. 判断结束<small>Final / Continue</small></div>
+</div>
+<pre><code>for step := 0; step &lt; maxSteps; step++ {
+    response := llm.Call(messages, tools)
+
+    if response.FinalAnswer != "" {
+        return response.FinalAnswer
+    }
+
+    toolCall := response.ToolCall
+    result, err := toolExecutor.Execute(ctx, toolCall)
+
+    messages = append(messages, ToolResultMessage(result, err))
+}</code></pre>
+<div class="callout warn"><strong>关键限制：</strong>生产环境必须设置 <code>maxSteps</code>、超时时间、工具白名单和审计日志，否则 Agent 可能陷入无限循环或执行危险操作。</div>
+</section>
+
+<section id="tool">
+<h2>3. 工具调用：Tool Definition 与 JSON Schema</h2>
+<p>文章提到“怎么把 Go 函数转成 OpenAI 能看懂的 JSON Schema”。这是 Agent 工程的核心。</p>
+<h3>3.1 工具定义应该包含什么</h3>
+<table>
+<tr><th>字段</th><th>说明</th><th>示例</th></tr>
+<tr><td>name</td><td>工具名称，必须稳定、清晰</td><td><code>query_order_status</code></td></tr>
+<tr><td>description</td><td>什么时候使用这个工具</td><td>根据订单号查询订单状态</td></tr>
+<tr><td>parameters</td><td>JSON Schema 参数定义</td><td>order_id: string</td></tr>
+<tr><td>permission</td><td>工具权限</td><td>read_only / write / admin</td></tr>
+<tr><td>timeout</td><td>最大执行时间</td><td>3s / 10s</td></tr>
+</table>
+
+<h3>3.2 Go 中的工具声明示意</h3>
+<pre><code>type QueryOrderArgs struct {
+    OrderID string `json:"order_id" jsonschema:"required,description=订单号"`
+}
+
+func QueryOrderStatus(ctx context.Context, args QueryOrderArgs) (OrderStatus, error) {
+    // 调用业务系统
+    return orderClient.GetStatus(ctx, args.OrderID)
+}</code></pre>
+
+<h3>3.3 容错机制</h3>
+<ul>
+<li>JSON 解析失败：把错误返回给模型，让它重试。</li>
+<li>参数校验失败：明确指出哪个字段错误。</li>
+<li>工具超时：返回 timeout observation。</li>
+<li>业务错误：区分“可重试错误”和“不可重试错误”。</li>
+<li>危险操作：要求人工确认，例如删除、转账、发消息。</li>
+</ul>
+</section>
+
+<section id="memory">
+<h2>4. 记忆管理：短期记忆与长期记忆</h2>
+<table>
+<tr><th>类型</th><th>存储内容</th><th>实现方式</th><th>风险</th></tr>
+<tr><td>短期记忆</td><td>当前对话上下文</td><td>messages 数组、滑动窗口</td><td>上下文过长、成本增加</td></tr>
+<tr><td>摘要记忆</td><td>长期对话摘要</td><td>定期 summarization</td><td>摘要损失细节</td></tr>
+<tr><td>向量记忆</td><td>历史事实、偏好、知识片段</td><td>embedding + vector db</td><td>召回错误记忆</td></tr>
+<tr><td>结构化记忆</td><td>用户画像、任务状态</td><td>数据库字段</td><td>隐私和权限问题</td></tr>
+</table>
+<div class="callout"><strong>建议：</strong>能结构化的长期信息尽量结构化存储，不要所有内容都丢进向量库。</div>
+</section>
+
+<section id="planning">
+<h2>5. 任务规划：从简单 Agent 到复杂 Agent</h2>
+<h3>5.1 单步工具 Agent</h3>
+<p>适合：查天气、查订单、查数据库。</p>
+<pre><code>用户问题 → 模型判断工具 → 调用工具 → 生成答案</code></pre>
+
+<h3>5.2 多步 ReAct Agent</h3>
+<p>适合：需要连续检索、计算、判断的问题。</p>
+<pre><code>用户目标 → 规划第 1 步 → 调工具 → 观察结果 → 规划第 2 步 → ...</code></pre>
+
+<h3>5.3 Plan-and-Execute</h3>
+<p>先生成完整计划，再按步骤执行。优点是整体性更好，缺点是计划可能过早固定。</p>
+
+<h3>5.4 Multi-Agent</h3>
+<p>多个 Agent 分工协作，例如：</p>
+<ul>
+<li>Planner Agent：制定计划</li>
+<li>Research Agent：检索资料</li>
+<li>Coder Agent：写代码</li>
+<li>Reviewer Agent：检查结果</li>
+</ul>
+</section>
+
+<section id="security">
+<h2>6. Agent 安全与边界</h2>
+<table>
+<tr><th>风险</th><th>说明</th><th>治理方式</th></tr>
+<tr><td>Prompt Injection</td><td>外部文档诱导模型忽略系统规则</td><td>隔离不可信内容，工具权限最小化</td></tr>
+<tr><td>工具滥用</td><td>模型调用不该调用的工具</td><td>工具白名单、权限分级</td></tr>
+<tr><td>无限循环</td><td>模型反复调用工具</td><td>maxSteps、超时、状态机约束</td></tr>
+<tr><td>数据泄露</td><td>把无权限数据放进上下文</td><td>检索前权限过滤、审计日志</td></tr>
+<tr><td>危险操作</td><td>删除、转账、发通知</td><td>Human-in-the-loop</td></tr>
+</table>
+</section>
+
+<section id="go">
+<h2>7. Go 在 Agent 工程中的优势</h2>
+<p>文章强调 Go 在高并发、强类型、企业级编排上的优势。可以进一步拆解为：</p>
+<div class="grid two">
+  <div class="card"><h3>并发与流式</h3><p>Goroutine 适合处理大量长连接；Channel 可以连接 LLM 流式输出与 HTTP SSE/WebSocket。</p></div>
+  <div class="card"><h3>Context 取消</h3><p>用户断开连接时取消下游 LLM、数据库、RPC 请求，减少资源浪费。</p></div>
+  <div class="card"><h3>强类型工具</h3><p>用 struct 和 tag 生成 JSON Schema，降低参数错误。</p></div>
+  <div class="card"><h3>工程稳定性</h3><p>适合做 Agent Gateway、Tool Server、Workflow Engine。</p></div>
+</div>
+
+<h3>7.1 推荐系统分层</h3>
+<pre><code>API Layer
+  - SSE / WebSocket / HTTP
+
+Agent Orchestrator
+  - Loop / Planning / Memory / Tool Routing
+
+Tool Runtime
+  - 参数校验 / 超时 / 重试 / 权限
+
+Business Connectors
+  - DB / RPC / Search / RAG / File / Message
+
+Observability
+  - Trace / Log / Eval / Audit</code></pre>
+</section>
+
+<section id="interview">
+<h2>8. 面试高频问题与回答要点</h2>
+<details open><summary>Q1：Agent 和普通 ChatBot 有什么区别？</summary>
+<p>ChatBot 主要生成自然语言回答；Agent 可以根据目标调用工具、观察结果、多轮规划并执行任务。Agent 的核心是循环控制、工具使用、记忆管理和安全边界。</p>
+</details>
+<details><summary>Q2：模型生成的工具参数错了怎么办？</summary>
+<p>先做 JSON Schema 校验；失败后把错误作为 observation 返回给模型，让模型自我修正；同时设置重试次数，超过次数后返回失败，不能无限重试。</p>
+</details>
+<details><summary>Q3：如何防止 Agent 无限循环？</summary>
+<p>设置 maxSteps、全局 timeout、相同工具连续调用限制、状态机约束，以及必要时人工介入。</p>
+</details>
+<details><summary>Q4：长期记忆应该怎么做？</summary>
+<p>对话摘要适合压缩历史上下文；向量记忆适合语义召回；用户偏好、任务状态等稳定信息更适合结构化数据库。长期记忆必须考虑隐私、删除和权限。</p>
+</details>
+</section>
+
+<section id="refs">
+<h2>9. 进一步学习资料</h2>
+<ul>
+<li><a href="https://cloud.tencent.com/developer/article/2640364" target="_blank">腾讯云开发者：现在的 AI Agent 面试到底都在面什么？Go 语言能做什么？</a></li>
+<li><a href="https://developers.openai.com/api/docs/guides/function-calling" target="_blank">OpenAI：Function Calling</a></li>
+<li><a href="https://developers.openai.com/api/docs/guides/tools" target="_blank">OpenAI：Using Tools</a></li>
+<li><a href="https://developers.openai.com/api/docs/guides/migrate-to-responses" target="_blank">OpenAI：Responses API</a></li>
+<li><a href="https://developers.llamaindex.ai/python/framework/" target="_blank">LlamaIndex：Agents and Workflows</a></li>
+<li><a href="https://docs.langchain.com/oss/python/learn" target="_blank">LangChain：Agent / RAG 学习路径</a></li>
+</ul>
+</section>
+
+<div class="footer">整理时间：2026-05-14 · 基于原文 RAG / Agent 部分扩展，加入工程化实践、面试表达和学习资料。</div>
+</main>
+</div>
+<script>
+const q=document.getElementById('searchBox');
+if(q){q.addEventListener('input',()=>{
+  const keyword=q.value.trim().toLowerCase();
+  document.querySelectorAll('main section').forEach(s=>{
+    s.style.display = !keyword || s.innerText.toLowerCase().includes(keyword) ? '' : 'none';
+  });
+});}
+document.querySelectorAll('pre').forEach(pre=>{
+  const btn=document.createElement('button');
+  btn.textContent='复制';
+  btn.style.cssText='float:right;margin:-8px 0 8px 8px;border:1px solid #334155;background:#1e293b;color:#fff;border-radius:8px;padding:4px 8px;cursor:pointer';
+  btn.onclick=()=>navigator.clipboard.writeText(pre.innerText);
+  pre.prepend(btn);
+});
+</script>
+</body>
+</html>

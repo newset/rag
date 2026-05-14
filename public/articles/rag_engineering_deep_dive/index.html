@@ -1,0 +1,262 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>RAG 工程化深度解析</title>
+<style>
+:root{
+  --bg:#f6f8fb;--panel:#ffffff;--text:#172033;--muted:#5f6b7a;--line:#dce3ee;
+  --brand:#2563eb;--brand2:#7c3aed;--ok:#059669;--warn:#d97706;--danger:#dc2626;
+  --code:#0f172a;--soft:#eef4ff;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.72}
+a{color:var(--brand);text-decoration:none} a:hover{text-decoration:underline}
+.layout{display:grid;grid-template-columns:280px 1fr;min-height:100vh}
+.sidebar{position:sticky;top:0;height:100vh;padding:24px 18px;background:#0f172a;color:#fff;overflow:auto}
+.sidebar h2{font-size:18px;margin:0 0 14px}
+.sidebar .hint{font-size:12px;color:#b8c2d6;margin-bottom:16px}
+.sidebar input{width:100%;border:1px solid #334155;border-radius:12px;background:#111827;color:#fff;padding:10px 12px;margin:8px 0 16px}
+.sidebar nav a{display:block;color:#dbeafe;padding:8px 10px;border-radius:10px;font-size:14px}
+.sidebar nav a:hover{background:#1e293b;text-decoration:none}
+main{max-width:1120px;padding:42px 48px 80px}
+.hero{background:linear-gradient(135deg,#2563eb,#7c3aed);color:#fff;border-radius:28px;padding:34px 36px;box-shadow:0 20px 50px rgba(37,99,235,.18)}
+.hero h1{font-size:34px;line-height:1.2;margin:0 0 10px}
+.hero p{margin:0;color:#eaf1ff}
+.badges{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+.badge{border:1px solid rgba(255,255,255,.32);background:rgba(255,255,255,.14);padding:6px 10px;border-radius:999px;font-size:13px}
+section{margin-top:28px;background:var(--panel);border:1px solid var(--line);border-radius:24px;padding:28px;box-shadow:0 8px 28px rgba(15,23,42,.05)}
+h2{font-size:26px;margin:0 0 16px} h3{font-size:19px;margin:22px 0 10px}
+.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.grid.two{grid-template-columns:repeat(2,minmax(0,1fr))}
+.card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:18px}
+.card h3{margin-top:0}
+.flow{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin:18px 0}
+.step{background:var(--soft);border:1px solid #c9d8ff;border-radius:16px;padding:14px;text-align:center;font-weight:650}
+.step small{display:block;color:var(--muted);font-weight:400}
+table{width:100%;border-collapse:collapse;margin:12px 0;background:#fff;border-radius:16px;overflow:hidden}
+th,td{border-bottom:1px solid var(--line);padding:12px 14px;text-align:left;vertical-align:top}
+th{background:#f1f5f9}
+pre{background:var(--code);color:#e2e8f0;padding:18px;border-radius:18px;overflow:auto}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono",monospace}
+details{border:1px solid var(--line);border-radius:16px;background:#fff;margin:12px 0;padding:14px 16px}
+summary{cursor:pointer;font-weight:700}
+.callout{border-left:5px solid var(--brand);background:#f8fbff;padding:14px 16px;border-radius:14px;margin:14px 0}
+.warn{border-left-color:var(--warn);background:#fff8ed}.ok{border-left-color:var(--ok);background:#f0fdf4}
+.tag{display:inline-block;background:#eef2ff;color:#3730a3;border-radius:999px;padding:3px 9px;font-size:12px;margin:2px}
+.checklist li{margin:8px 0}
+.kbd{background:#f1f5f9;border:1px solid #cbd5e1;border-bottom-width:2px;border-radius:6px;padding:1px 6px}
+.footer{color:var(--muted);font-size:13px;margin-top:22px}
+@media(max-width:900px){.layout{grid-template-columns:1fr}.sidebar{position:relative;height:auto}.grid,.grid.two,.flow{grid-template-columns:1fr}main{padding:20px}}
+</style>
+</head>
+<body>
+<div class="layout">
+<aside class="sidebar">
+  <h2>RAG 工程化深度解析</h2>
+  <div class="hint">输入关键词可过滤正文模块</div>
+  <input id="searchBox" placeholder="搜索：chunk / rerank / tool..." />
+  <nav><a href="#overview">1. RAG 本质</a>
+<a href="#etl">2. ETL 与 Chunking</a>
+<a href="#retrieval">3. 混合检索</a>
+<a href="#index">4. 向量索引</a>
+<a href="#rerank">5. Rerank</a>
+<a href="#generation">6. 生成阶段</a>
+<a href="#eval">7. 评估指标</a>
+<a href="#go">8. Go 落地</a>
+<a href="#refs">9. 学习资料</a></nav>
+</aside>
+<main>
+
+<div class="hero">
+  <h1>RAG 工程化深度解析</h1>
+  <p>围绕“检索增强生成”的数据链路、检索策略、重排序、评估与生产落地展开，适合准备 AI 工程化面试或建设企业知识问答系统。</p>
+  <div class="badges"><span class="badge">ETL / Chunking</span><span class="badge">Hybrid Search</span><span class="badge">Rerank</span><span class="badge">评估与治理</span></div>
+</div>
+
+<section id="overview">
+<h2>1. RAG 的本质</h2>
+<p>RAG（Retrieval-Augmented Generation）可以理解为：<strong>检索系统 + 生成系统 + 工程治理</strong>。文章中把 RAG 解释为“检索系统 + 生成系统”，这是非常准确的工程视角。真正落地时，RAG 不是简单把文档塞进向量库，而是要解决“数据如何处理、如何召回、如何过滤、如何排序、如何让模型只基于证据回答”的完整链路。</p>
+<div class="flow">
+  <div class="step">1. 文档接入<small>PDF / HTML / Markdown</small></div>
+  <div class="step">2. 清洗切片<small>Chunk + 元数据</small></div>
+  <div class="step">3. 建索引<small>BM25 + Vector</small></div>
+  <div class="step">4. 检索重排<small>TopK + Rerank</small></div>
+  <div class="step">5. 生成回答<small>Grounded Answer</small></div>
+</div>
+<div class="callout ok"><strong>面试表达：</strong>RAG 的核心不是“能不能跑通 Demo”，而是能否在召回率、准确率、延迟、成本、权限和可观测性之间做权衡。</div>
+</section>
+
+<section id="etl">
+<h2>2. 数据处理链路：ETL 与 Chunking</h2>
+<h3>2.1 文档解析</h3>
+<p>不同数据源需要不同解析策略：</p>
+<table>
+<tr><th>数据类型</th><th>处理重点</th><th>常见问题</th></tr>
+<tr><td>PDF</td><td>页码、标题、段落、表格、图片 OCR</td><td>多栏排版、页眉页脚噪音、表格结构丢失</td></tr>
+<tr><td>HTML</td><td>DOM 层级、正文抽取、链接保留</td><td>导航栏、广告、脚本内容污染</td></tr>
+<tr><td>Markdown</td><td>标题层级、代码块、列表结构</td><td>切片时破坏标题上下文</td></tr>
+<tr><td>业务数据库</td><td>字段语义、主外键关系、时间版本</td><td>只向量化文本而忽略结构化过滤条件</td></tr>
+</table>
+
+<h3>2.2 Chunk 大小怎么选</h3>
+<p>文章提到 512、1024 token 以及 10%–20% overlap。可以这样细化：</p>
+<table>
+<tr><th>场景</th><th>建议 chunk</th><th>overlap</th><th>原因</th></tr>
+<tr><td>FAQ / 短知识</td><td>100–300 tokens</td><td>0–10%</td><td>问题答案短，过大反而引入噪音</td></tr>
+<tr><td>技术文档</td><td>400–800 tokens</td><td>10%–20%</td><td>需要保留段落上下文</td></tr>
+<tr><td>法律 / 合同</td><td>800–1500 tokens</td><td>15%–25%</td><td>条款依赖上下文，不能切太碎</td></tr>
+<tr><td>代码仓库</td><td>按函数 / 类 / 文件切</td><td>按依赖关系补上下文</td><td>固定长度不适合代码语义</td></tr>
+</table>
+
+<details open><summary>推荐的 Chunk 元数据</summary>
+<ul>
+<li><code>doc_id</code>：文档唯一标识</li>
+<li><code>source</code>：来源系统，例如知识库、S3、Git、数据库</li>
+<li><code>title_path</code>：标题路径，例如“产品手册 / 计费 / 退款规则”</li>
+<li><code>page_no</code>：PDF 页码</li>
+<li><code>updated_at</code>：最后更新时间</li>
+<li><code>permission_scope</code>：权限范围</li>
+<li><code>chunk_index</code>：切片序号</li>
+<li><code>hash</code>：内容哈希，用于增量更新</li>
+</ul>
+</details>
+</section>
+
+<section id="retrieval">
+<h2>3. 检索：BM25、向量检索与 Hybrid Search</h2>
+<p>文章中提到 Hybrid Search：BM25 负责关键词精确匹配，Embedding 负责语义匹配。生产系统一般不会只用一种检索方式。</p>
+<div class="grid three">
+  <div class="card"><h3>BM25</h3><p>适合专有名词、错误码、字段名、API 名称、订单号等强关键词场景。</p></div>
+  <div class="card"><h3>Vector Search</h3><p>适合同义表达、自然语言问题、概念性检索。</p></div>
+  <div class="card"><h3>Hybrid Search</h3><p>两路召回后做结果融合，通常比单一路径更稳。</p></div>
+</div>
+
+<h3>3.1 RRF 倒数排名融合</h3>
+<p>RRF（Reciprocal Rank Fusion）常用于融合 BM25 和向量检索结果。它不直接依赖原始分数，而根据排名计算融合分。</p>
+<pre><code>score(d) = Σ 1 / (k + rank_i(d))
+
+其中：
+- d：文档
+- rank_i(d)：文档在第 i 个检索器中的排名
+- k：平滑常数，常用 60</code></pre>
+
+<h3>3.2 Pre-filter 与 Post-filter</h3>
+<table>
+<tr><th>方式</th><th>含义</th><th>适用场景</th></tr>
+<tr><td>Pre-filter</td><td>检索前先按元数据过滤</td><td>权限、时间、业务类型、租户隔离</td></tr>
+<tr><td>Post-filter</td><td>召回后再过滤</td><td>过滤条件不容易下推到索引时</td></tr>
+</table>
+<div class="callout warn"><strong>生产重点：</strong>权限过滤必须尽量做 Pre-filter，不能先把无权限内容召回给模型再依赖 prompt 约束。</div>
+</section>
+
+<section id="index">
+<h2>4. 向量索引：IVF_FLAT 与 HNSW</h2>
+<table>
+<tr><th>索引</th><th>核心思想</th><th>优点</th><th>缺点</th><th>适合场景</th></tr>
+<tr><td>FLAT</td><td>暴力精确搜索</td><td>召回最准确</td><td>慢、成本高</td><td>小规模数据、评估基线</td></tr>
+<tr><td>IVF_FLAT</td><td>先聚类，再在相近簇内搜索</td><td>速度快，内存可控</td><td>召回受 nprobe 影响</td><td>大规模向量检索</td></tr>
+<tr><td>HNSW</td><td>分层图近邻搜索</td><td>低延迟、高召回</td><td>内存占用高，构建成本高</td><td>低延迟在线检索</td></tr>
+</table>
+<p>调参时通常关注：</p>
+<ul>
+<li><code>top_k</code>：召回候选数量</li>
+<li><code>nprobe</code>：IVF 搜索多少个簇</li>
+<li><code>efSearch</code>：HNSW 搜索广度</li>
+<li><code>M</code>：HNSW 图连接数</li>
+</ul>
+</section>
+
+<section id="rerank">
+<h2>5. Rerank：为什么“召回 100 条，精排 5 条”</h2>
+<p>文章提到 Bi-Encoder 和 Cross-Encoder 的区别。可以这样理解：</p>
+<table>
+<tr><th>模型</th><th>方式</th><th>速度</th><th>精度</th><th>用途</th></tr>
+<tr><td>Bi-Encoder</td><td>query 和 doc 分别编码，再算相似度</td><td>快</td><td>中等</td><td>第一阶段召回</td></tr>
+<tr><td>Cross-Encoder</td><td>query + doc 拼接后整体判断相关性</td><td>慢</td><td>高</td><td>第二阶段重排序</td></tr>
+</table>
+<p>推荐流程：</p>
+<pre><code>BM25 Top50
+Vector Top50
+      ↓
+RRF 融合，得到 Top100
+      ↓
+Cross-Encoder Rerank
+      ↓
+取 Top5 / Top8 进入 Prompt</code></pre>
+</section>
+
+<section id="generation">
+<h2>6. 生成阶段：Grounded Answer</h2>
+<p>RAG 的生成阶段必须约束模型基于资料回答，而不是自由发挥。</p>
+<pre><code>你是企业知识库助手。
+请严格依据【参考资料】回答。
+如果资料中没有答案，请回答“根据当前资料无法确认”。
+回答时给出引用来源，包括文档名、页码或标题路径。</code></pre>
+<ul>
+<li>要求模型引用来源</li>
+<li>禁止使用未提供的背景知识补充关键结论</li>
+<li>对证据不足的问题返回“不确定”</li>
+<li>将答案结构化输出，便于前端展示</li>
+</ul>
+</section>
+
+<section id="eval">
+<h2>7. RAG 评估指标</h2>
+<table>
+<tr><th>指标</th><th>含义</th><th>如何优化</th></tr>
+<tr><td>Recall@K</td><td>正确答案是否进入 TopK</td><td>优化 chunk、embedding、hybrid search</td></tr>
+<tr><td>MRR</td><td>正确文档排名是否靠前</td><td>加入 rerank</td></tr>
+<tr><td>Faithfulness</td><td>答案是否忠于资料</td><td>改 prompt、引用校验</td></tr>
+<tr><td>Latency</td><td>端到端耗时</td><td>缓存、并发检索、模型裁剪</td></tr>
+<tr><td>Cost</td><td>Embedding、Rerank、LLM 成本</td><td>增量索引、缓存、减少上下文</td></tr>
+</table>
+</section>
+
+<section id="go">
+<h2>8. Go 在 RAG 中适合做什么</h2>
+<ul class="checklist">
+<li><strong>文档上传与解析服务：</strong>Gin / Fiber + 异步任务队列。</li>
+<li><strong>索引构建管道：</strong>批量 embedding、失败重试、增量更新。</li>
+<li><strong>检索 API：</strong>并发调用 BM25、向量库、reranker。</li>
+<li><strong>流式回答：</strong>SSE / WebSocket + context cancellation。</li>
+<li><strong>权限控制：</strong>租户、用户、部门、文档 ACL 下推到检索层。</li>
+</ul>
+</section>
+
+<section id="refs">
+<h2>9. 进一步学习资料</h2>
+<ul>
+<li><a href="https://cloud.tencent.com/developer/article/2640364" target="_blank">腾讯云开发者：现在的 AI Agent 面试到底都在面什么？Go 语言能做什么？</a></li>
+<li><a href="https://docs.langchain.com/oss/python/langchain/retrieval" target="_blank">LangChain Retrieval 文档</a></li>
+<li><a href="https://docs.langchain.com/oss/python/langchain/rag" target="_blank">LangChain：Build a RAG agent</a></li>
+<li><a href="https://developers.llamaindex.ai/python/framework/understanding/rag/" target="_blank">LlamaIndex：Introduction to RAG</a></li>
+<li><a href="https://milvus.io/docs/index-explained.md" target="_blank">Milvus：Index Explained</a></li>
+<li><a href="https://milvus.io/docs/hnsw.md" target="_blank">Milvus：HNSW Index</a></li>
+<li><a href="https://milvus.io/docs/ivf-flat.md" target="_blank">Milvus：IVF_FLAT Index</a></li>
+</ul>
+</section>
+
+<div class="footer">整理时间：2026-05-14 · 基于原文 RAG / Agent 部分扩展，加入工程化实践、面试表达和学习资料。</div>
+</main>
+</div>
+<script>
+const q=document.getElementById('searchBox');
+if(q){q.addEventListener('input',()=>{
+  const keyword=q.value.trim().toLowerCase();
+  document.querySelectorAll('main section').forEach(s=>{
+    s.style.display = !keyword || s.innerText.toLowerCase().includes(keyword) ? '' : 'none';
+  });
+});}
+document.querySelectorAll('pre').forEach(pre=>{
+  const btn=document.createElement('button');
+  btn.textContent='复制';
+  btn.style.cssText='float:right;margin:-8px 0 8px 8px;border:1px solid #334155;background:#1e293b;color:#fff;border-radius:8px;padding:4px 8px;cursor:pointer';
+  btn.onclick=()=>navigator.clipboard.writeText(pre.innerText);
+  pre.prepend(btn);
+});
+</script>
+</body>
+</html>

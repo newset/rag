@@ -1,0 +1,1163 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>React 面试题精选</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=Noto+Sans+SC:wght@300;400;500;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    /* Light mode (default) */
+    --bg: #f5f5f7;
+    --surface: #ffffff;
+    --surface2: #eef0f5;
+    --border: #d8dae8;
+    --accent: #0077cc;
+    --accent2: #6d28d9;
+    --accent3: #d97706;
+    --text: #111118;
+    --muted: #7878a0;
+    --easy: #16a34a;
+    --medium: #d97706;
+    --hard: #dc2626;
+    --grid-line: rgba(0,119,204,0.06);
+    --blob: rgba(109,40,217,0.07);
+    --answer-text: #3a3a5c;
+    --pre-text: #2c2c50;
+    --transition: background 0.3s, color 0.3s, border-color 0.3s;
+  }
+
+  html.dark {
+    --bg: #0a0a0f;
+    --surface: #111118;
+    --surface2: #1a1a25;
+    --border: #2a2a3a;
+    --accent: #00e5ff;
+    --accent2: #7c3aed;
+    --accent3: #f59e0b;
+    --text: #e8e8f0;
+    --muted: #6b6b85;
+    --easy: #22c55e;
+    --medium: #f59e0b;
+    --hard: #ef4444;
+    --grid-line: rgba(0,229,255,0.03);
+    --blob: rgba(124,58,237,0.12);
+    --answer-text: #a0a0bc;
+    --pre-text: #c4c4dc;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Noto Sans SC', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+    transition: var(--transition);
+  }
+
+  /* Grid background */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(var(--grid-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* Glow blob */
+  body::after {
+    content: '';
+    position: fixed;
+    top: -20%;
+    right: -10%;
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, var(--blob) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    position: relative;
+    z-index: 1;
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 60px 24px 80px;
+  }
+
+  /* Header */
+  header {
+    margin-bottom: 60px;
+    animation: fadeUp 0.6s ease both;
+  }
+
+  .header-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--accent);
+    background: rgba(0,229,255,0.08);
+    border: 1px solid rgba(0,229,255,0.2);
+    padding: 4px 12px;
+    border-radius: 2px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+
+  .header-tag::before {
+    content: '▶';
+    font-size: 8px;
+  }
+
+  h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(36px, 6vw, 64px);
+    font-weight: 800;
+    line-height: 1.05;
+    letter-spacing: -2px;
+    background: linear-gradient(135deg, #ffffff 0%, var(--accent) 60%, var(--accent2) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 16px;
+  }
+
+  .header-sub {
+    color: var(--muted);
+    font-size: 15px;
+    font-weight: 300;
+    letter-spacing: 0.3px;
+  }
+
+  .stats-bar {
+    display: flex;
+    gap: 24px;
+    margin-top: 32px;
+    flex-wrap: wrap;
+  }
+
+  .stat {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  .stat-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+  }
+
+  .stat-dot.easy { background: var(--easy); box-shadow: 0 0 8px var(--easy); }
+  .stat-dot.medium { background: var(--medium); box-shadow: 0 0 8px var(--medium); }
+  .stat-dot.hard { background: var(--hard); box-shadow: 0 0 8px var(--hard); }
+
+  /* Filter tabs */
+  .filter-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 36px;
+    flex-wrap: wrap;
+    animation: fadeUp 0.6s 0.1s ease both;
+  }
+
+  .filter-btn {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    padding: 6px 16px;
+    border-radius: 2px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    transition: all 0.2s;
+  }
+
+  .filter-btn:hover, .filter-btn.active {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: rgba(0,229,255,0.06);
+  }
+
+  /* Category section */
+  .category {
+    margin-bottom: 48px;
+    animation: fadeUp 0.6s ease both;
+  }
+
+  .category-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+
+  .category-num {
+    font-family: 'Syne', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--accent2);
+    letter-spacing: 2px;
+  }
+
+  .category-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: -0.5px;
+  }
+
+  .category-line {
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, var(--border), transparent);
+  }
+
+  /* Question cards */
+  .question-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    margin-bottom: 12px;
+    overflow: hidden;
+    transition: border-color 0.2s, transform 0.2s;
+    cursor: pointer;
+  }
+
+  .question-card:hover {
+    border-color: rgba(0,229,255,0.3);
+    transform: translateX(4px);
+  }
+
+  .question-card.open {
+    border-color: rgba(0,229,255,0.4);
+  }
+
+  .q-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 18px 20px;
+  }
+
+  .q-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    min-width: 28px;
+    padding-top: 2px;
+  }
+
+  .q-content {
+    flex: 1;
+  }
+
+  .q-title {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text);
+    line-height: 1.5;
+  }
+
+  .q-meta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 6px;
+  }
+
+  .badge {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 2px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+
+  .badge.easy { background: rgba(34,197,94,0.12); color: var(--easy); border: 1px solid rgba(34,197,94,0.2); }
+  .badge.medium { background: rgba(245,158,11,0.12); color: var(--medium); border: 1px solid rgba(245,158,11,0.2); }
+  .badge.hard { background: rgba(239,68,68,0.12); color: var(--hard); border: 1px solid rgba(239,68,68,0.2); }
+
+  .q-tag {
+    font-size: 11px;
+    color: var(--muted);
+  }
+
+  .q-arrow {
+    color: var(--muted);
+    font-size: 12px;
+    transition: transform 0.25s, color 0.2s;
+    padding-top: 3px;
+    min-width: 14px;
+  }
+
+  .question-card.open .q-arrow {
+    transform: rotate(90deg);
+    color: var(--accent);
+  }
+
+  .q-answer {
+    display: none;
+    padding: 0 20px 20px 62px;
+    font-size: 13.5px;
+    line-height: 1.8;
+    color: var(--answer-text);
+  }
+
+  .question-card.open .q-answer { display: block; }
+
+  .q-answer code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    padding: 2px 6px;
+    border-radius: 3px;
+    color: var(--accent);
+  }
+
+  .q-answer pre {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent2);
+    padding: 14px 16px;
+    border-radius: 4px;
+    margin: 12px 0;
+    overflow-x: auto;
+    line-height: 1.7;
+    color: var(--pre-text);
+  }
+
+  .q-answer strong {
+    color: var(--accent);
+    font-weight: 500;
+  }
+
+  .q-answer ul {
+    padding-left: 18px;
+    margin: 8px 0;
+  }
+
+  .q-answer li {
+    margin-bottom: 4px;
+  }
+
+  /* Footer */
+  footer {
+    margin-top: 60px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: var(--muted);
+    font-size: 12px;
+    font-family: 'JetBrains Mono', monospace;
+    animation: fadeUp 0.6s 0.3s ease both;
+  }
+
+  .footer-logo {
+    color: var(--accent);
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Stagger cards */
+  .question-card { animation: fadeUp 0.4s ease both; }
+  .question-card:nth-child(1) { animation-delay: 0.05s; }
+  .question-card:nth-child(2) { animation-delay: 0.1s; }
+  .question-card:nth-child(3) { animation-delay: 0.15s; }
+  .question-card:nth-child(4) { animation-delay: 0.2s; }
+  .question-card:nth-child(5) { animation-delay: 0.25s; }
+
+  @media (max-width: 600px) {
+    .q-answer { padding-left: 20px; }
+    .stats-bar { gap: 16px; }
+  }
+
+  /* Dark mode toggle */
+  .theme-toggle {
+    position: fixed;
+    top: 20px;
+    right: 24px;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 6px 14px 6px 10px;
+    cursor: pointer;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.5px;
+    transition: var(--transition), box-shadow 0.2s;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    user-select: none;
+  }
+
+  .theme-toggle:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    box-shadow: 0 2px 16px rgba(0,0,0,0.13);
+  }
+
+  .toggle-track {
+    width: 32px;
+    height: 18px;
+    border-radius: 999px;
+    background: var(--border);
+    position: relative;
+    transition: background 0.3s;
+    flex-shrink: 0;
+  }
+
+  html.dark .toggle-track {
+    background: var(--accent2);
+  }
+
+  .toggle-thumb {
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #fff;
+    transition: transform 0.3s cubic-bezier(.4,0,.2,1);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+  }
+
+  html.dark .toggle-thumb {
+    transform: translateX(14px);
+  }
+
+  .toggle-icon {
+    font-size: 14px;
+    line-height: 1;
+  }
+
+  /* Light mode h1 gradient */
+  html:not(.dark) h1 {
+    background: linear-gradient(135deg, #111118 0%, var(--accent) 60%, var(--accent2) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }</style>
+</head>
+<body>
+<button class="theme-toggle" onclick="toggleTheme()" title="切换深色/浅色模式">
+  <div class="toggle-track"><div class="toggle-thumb"></div></div>
+  <span class="toggle-icon" id="theme-icon">🌙</span>
+  <span id="theme-label">Dark</span>
+</button>
+<div class="container">
+
+  <header>
+    <div class="header-tag">Interview Prep</div>
+    <h1>React<br>面试题精选</h1>
+    <p class="header-sub">涵盖核心概念 · Hooks · 性能优化 · 状态管理 · 原理深度</p>
+    <div class="stats-bar">
+      <div class="stat"><span class="stat-dot easy"></span>初级 · 8题</div>
+      <div class="stat"><span class="stat-dot medium"></span>中级 · 9题</div>
+      <div class="stat"><span class="stat-dot hard"></span>高级 · 8题</div>
+    </div>
+  </header>
+
+  <div class="filter-row">
+    <button class="filter-btn active" onclick="filterCards('all', this)">全部</button>
+    <button class="filter-btn" onclick="filterCards('easy', this)">初级</button>
+    <button class="filter-btn" onclick="filterCards('medium', this)">中级</button>
+    <button class="filter-btn" onclick="filterCards('hard', this)">高级</button>
+  </div>
+
+  <!-- 基础概念 -->
+  <div class="category" style="animation-delay:0.1s">
+    <div class="category-header">
+      <span class="category-num">01</span>
+      <span class="category-title">基础概念</span>
+      <div class="category-line"></div>
+    </div>
+
+    <div class="question-card" data-level="easy" onclick="toggle(this)">
+      <div class="q-header">
+        <span class="q-num">Q1</span>
+        <div class="q-content">
+          <div class="q-title">React 中虚拟 DOM 是什么？它解决了什么问题？</div>
+          <div class="q-meta"><span class="badge easy">初级</span><span class="q-tag">核心原理</span></div>
+        </div>
+        <span class="q-arrow">▶</span>
+      </div>
+      <div class="q-answer">
+        虚拟 DOM（Virtual DOM）是用 JavaScript 对象描述真实 DOM 树的一种抽象层。<br><br>
+        <strong>解决的问题：</strong>
+        <ul>
+          <li>真实 DOM 操作成本高，频繁操作会触发重排重绘</li>
+          <li>虚拟 DOM 通过 Diff 算法，仅将变化部分同步到真实 DOM（最小化更新）</li>
+          <li>提供了跨平台抽象能力（React Native、SSR）</li>
+        </ul>
+        <strong>工作流程：</strong> state/props 变化 → 生成新 vDOM → Diff 对比旧 vDOM → patch 到真实 DOM
+      </div>
+    </div>
+
+    <div class="question-card" data-level="easy" onclick="toggle(this)">
+      <div class="q-header">
+        <span class="q-num">Q2</span>
+        <div class="q-content">
+          <div class="q-title">受控组件与非受控组件的区别？</div>
+          <div class="q-meta"><span class="badge easy">初级</span><span class="q-tag">表单</span></div>
+        </div>
+        <span class="q-arrow">▶</span>
+      </div>
+      <div class="q-answer">
+        <strong>受控组件</strong>：表单数据由 React state 控制，每次变化都触发 <code>onChange</code> 并同步 state。数据流单向且可预测。<br><br>
+        <strong>非受控组件</strong>：表单数据由 DOM 自身维护，通过 <code>ref</code> 直接读取 DOM 值，无需 state 同步。<br><br>
+        <pre>// 受控
+const [val, setVal] = useState('')
+&lt;input value={val} onChange={e => setVal(e.target.value)} /&gt;
+
+// 非受控
+const ref = useRef()
+&lt;input ref={ref} defaultValue="初始值" /&gt;</pre>
+        推荐优先使用受控组件，便于验证、格式化和联动。
+      </div>
+    </div>
+
+    <div class="question-card" data-level="easy" onclick="toggle(this)">
+      <div class="q-header">
+        <span class="q-num">Q3</span>
+        <div class="q-content">
+          <div class="q-title">React 中 key 的作用是什么？为什么不能用 index？</div>
+          <div class="q-meta"><span class="badge easy">初级</span><span class="q-tag">列表渲染</span></div>
+        </div>
+        <span class="q-arrow">▶</span>
+      </div>
+      <div class="q-answer">
+        <code>key</code> 帮助 React 在 Diff 时识别哪些元素发生了变化、被添加或删除，从而复用已有的 DOM 节点，提升性能。<br><br>
+        <strong>用 index 的问题：</strong>当列表顺序变化（排序、删除头部元素）时，index 与元素的对应关系改变，导致 React 错误地复用旧 DOM，引发状态混乱（如输入框内容错位）。<br><br>
+        <strong>正确做法：</strong>用数据唯一 ID 作为 key，如 <code>key={item.id}</code>
+      </div>
+    </div>
+
+    <div class="question-card" data-level="easy" onclick="toggle(this)">
+      <div class="q-header">
+        <span class="q-num">Q4</span>
+        <div class="q-content">
+          <div class="q-title">什么是 JSX？它如何被转换为 JavaScript？</div>
+          <div class="q-meta"><span class="badge easy">初级</span><span class="q-tag">语法</span></div>
+        </div>
+        <span class="q-arrow">▶</span>
+      </div>
+      <div class="q-answer">
+        JSX 是 JavaScript 的语法扩展，允许在 JS 中写类 HTML 标记。Babel 会将 JSX 转译为 <code>React.createElement()</code> 调用（React 17+ 使用新 JSX Transform，自动导入 <code>react/jsx-runtime</code>）。<br><br>
+        <pre>&lt;Button color="blue"&gt;Click&lt;/Button&gt;
+// 转译为：
+React.createElement(Button, { color: 'blue' }, 'Click')</pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- Hooks -->
+  <div class="category" style="animation-delay:0.15s">
+    <div class="category-header">
+      <span class="category-num">02</span>
+      <span class="category-title">Hooks 深度</span>
+      <div class="category-line"></div>
+    </div>
+
+    <div class="question-card" data-level="medium" onclick="toggle(this)">
+      <div class="q-header">
+        <span class="q-num">Q5</span>
+        <div class="q-content">
+          <div class="q-title">useEffect 的依赖数组三种形态的区别？</div>
+          <div class="q-meta"><span class="badge medium">中级</span><span class="q-tag">Hooks</span></div>
+        </div>
+        <span class="q-arrow">▶</span>
+      </div>
+      <div class="q-answer">
+        <pre>// 1. 无依赖数组 → 每次渲染后都执行
+useEffect(() => { ... })
+
+// 2. 空数组 → 仅挂载时执行一次（相当于 componentDidMount）
+useEffect(() => { ... }, [])
+
+// 3. 有依赖 → 依赖项变化时才执行
+useEffect(() => { ... }, [count, id])</pre>
+        <strong>清理函数：</strong>返回的函数在下次 effect 执行前或组件卸载时调用，用于清除订阅、定时器等副作用。
+      </div>
+    </div>
+
+    <div class="question-card" data-level="medium" onclick="toggle(this)">
+      <div class="q-header">
+        <span class="q-num">Q6</span>
+        <div class="q-content">
+          <div class="q-title">useMemo 与 useCallback 的区别与使用场景？</div>
+          <div class="q-meta"><span class="badge medium">中级</span><span class="q-tag">性能优化</span></div>
+        </div>
+        <span class="q-arrow">▶</span>
+      </div>
+      <div class="q-answer">
+        <strong>useMemo</strong>：缓存计算结果（值），避免每次渲染都重复昂贵计算。<br>
+        <strong>useCallback</strong>：缓存函数引用，避免子组件因父组件重渲染导致接收到新函数引用而不必要地重渲染。<br><br>
+        <pre>const sorted = useMemo(() => data.sort(...), [data])
+const handleClick = useCallback(() => { ... }, [id])</pre>
+        <strong>使用原则：</strong>不要滥用，仅在有性能问题时使用。过度使用会增加内存开销和代码复杂度。配合 <code>React.memo</code> 才能发挥最大效果。
+      </div>
+    </div>
+
+    <div class="question-card" data-level="medium" onclick="toggle(this)">
+      <div class="q-header">
+        <span class="q-num">Q7</span>
+        <div class="q-content">
+          <div class="q-title">useRef 除了访问 DOM，还有哪些用途？</div>
+          <div class="q-meta"><span class="badge medium">中级</span><span class="q-tag">Hooks</span></div>
+        </div>
+        <span class="q-arrow">▶</span>
+      </div>
+      <div class="q-answer">
+        <code>useRef</code> 返回一个在整个组件生命周期内持久存在的可变对象（<code>.current</code>），修改它<strong>不会触发重渲染</strong>。<br><br>
+        <strong>常见用途：</strong>
+        <ul>
+          <li>保存定时器 ID（<code>clearInterval(timerRef.current)</code>）</li>
+          <li>保存上一次的 props/state 值</li>
+          <li>存储不影响渲染的实例变量（如 WebSocket 实例）</li>
+          <li>在闭包中获取最新值（避免 stale closure）</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="question-card" data-level="hard" onclick="toggle(this)">
+      <div class="q-header">
+        <span class="q-num">Q8</span>
+        <div class="q-content">
+          <div class="q-title">解释 Hooks 的闭包陷阱（stale closure）及解决方案</div>
+          <div class="q-meta"><span class="badge hard">高级</span><span class="q-tag">Hooks · 陷阱</span></div>
+        </div>
+        <span class="q-arrow">▶</span>
+      </div>
+      <div class="q-answer">
+        <strong>问题：</strong>useEffect/useCallback 等 Hook 内的函数捕获了创建时的变量快照，当依赖未正确声明时，读取的是过期的旧值。<br><br>
+        <pre>// 陷阱：count 永远是 0
+useEffect(() => {
+  const id = setInterval(() => console.log(count), 1000)
+  return () => clearInterval(id)
+}, []) // 缺少 count 依赖</pre>
+        <strong>解决方案：</strong>
+        <ul>
+          <li>正确声明所有依赖（使用 ESLint exhaustive-deps 规则）</li>
+          <li>用 <code>useRef</code> 保存最新值：<code>const countRef = useRef(count)</code></li>
+          <li>使用函数式 setState 更新：<code>setCount(c => c + 1)</code></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="question-card" data-level="hard" onclick="toggle(this)">
+      <div class="q-header">
+        <span class="q-num">Q9</span>
+        <div class="q-content">
+          <div class="q-title">如何实现一个自定义 Hook？有哪些设计原则？</div>
+          <div class="q-meta"><span class="badge hard">高级</span><span class="q-tag">自定义 Hooks</span></div>
+        </div>
+        <span class="q-arrow">▶</span>
+      </div>
+      <div class="q-answer">
+        自定义 Hook 是以 <code>use</code> 开头的函数，内部可以调用其他 Hooks，用于复用有状态逻辑（非 UI）。<br><br>
+        <pre>function useFetch(url) {
+  const [data, setData] = useState(null)
+  const [loading, setLoading] = useState(true)
+  useEffect(() => {
+    fetch(url).then(r => r.json()).then(d => {
+      setData(d); setLoading(false)
+    })
+  }, [url])
+  return { data, loading }
+}</pre>
+        <strong>设计原则：</strong>
+        <ul>
+          <li>只提取逻辑，不包含 JSX</li>
+          <li>参数保持稳定引用（避免无限循环）</li>
+          <li>返回值语义清晰，优先返回对象（方便按需解构）</li>
+          <li>处理好清理逻辑，避免内存泄漏</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- 性能优化 -->
+  <div class="category" style="animation-delay:0.2s">
+    <div class="category-header">
+      <span class="category-num">03</span>
+      <span class="category-title">性能优化</span>
+      <div class="category-line"></div>
+    </div>
+
+    <div class="question-card" data-level="medium" onclick="toggle(this)">
+      <div class="q-header">
+        <span class="q-num">Q10</span>
+        <div class="q-content">
+          <div class="q-title">React.memo 的工作原理及适用场景？</div>
+          <div class="q-meta"><span class="badge medium">中级</span><span class="q-tag">性能</span></div>
+        </div>
+        <span class="q-arrow">▶</span>
+      </div>
+      <div class="q-answer">
+        <code>React.memo</code> 是高阶组件，对函数组件进行浅比较（shallow compare）：如果 props 没有变化，跳过渲染，直接复用上次结果。<br><br>
+        <pre>const Child = React.memo(({ name }) => &lt;div&gt;{name}&lt;/div&gt;)
+// 也可自定义比较函数：
+const Child = React.memo(Component, (prev, next) => {
+  return prev.id === next.id // 返回 true 则跳过渲染
+})</pre>
+        <strong>适用场景：</strong>纯展示组件、父组件频繁重渲染但子组件 props 基本不变时。<br>
+        <strong>注意：</strong>若 props 包含对象/函数引用，需配合 <code>useMemo</code>/<code>useCallback</code> 保证引用稳定。
+      </div>
+    </div>
+
+    <div class="question-card" data-level="medium" onclick="toggle(this)">
+      <div class="q-header">
+        <span class="q-num">Q11</span>
+        <div class="q-content">
+          <div class="q-title">什么是代码分割？如何在 React 中实现？</div>
+          <div class="q-meta"><span class="badge medium">中级</span><span class="q-tag">性能 · 工程化</span></div>
+        </div>
+        <span class="q-arrow">▶</span>
+      </div>
+      <div class="q-answer">
+        代码分割将应用拆分为多个较小的 chunk，按需加载，减少初始 bundle 体积，提升首屏性能。<br><br>
+        <pre>import { lazy, Suspense } from 'react'
+const Chart = lazy(() => import('./Chart'))
+
+function App() {
+  return (
+    &lt;Suspense fallback={&lt;Spinner /&gt;}&gt;
+      &lt;Chart /&gt;
+    &lt;/Suspense&gt;
+  )
+}</pre>
+        <strong>策略：</strong>按路由分割（每个页面单独 chunk）、按功能分割（弹窗、图表等重型组件）。结合 webpack/vite 的动态 import 实现。
+      </div>
+    </div>
+
+    <div class="question-card" data-level="hard" onclick="toggle(this)">
+      <div class="q-header">
+        <span class="q-num">Q12</span>
+        <div class="q-content">
+          <div class="q-title">解释 React 18 的并发特性（Concurrent Features）</div>
+          <div class="q-meta"><span class="badge hard">高级</span><span class="q-tag">React 18 · 并发</span></div>
+        </div>
+        <span class="q-arrow">▶</span>
+      </div>
+      <div class="q-answer">
+        React 18 引入并发模式，允许渲染工作被中断、暂停和恢复，优先响应用户交互。<br><br>
+        <strong>核心 API：</strong>
+        <ul>
+          <li><code>useTransition</code>：将非紧急更新标记为 transition，避免阻塞用户输入（如搜索过滤）</li>
+          <li><code>useDeferredValue</code>：延迟某个值的更新，类似防抖但由 React 调度</li>
+          <li><code>startTransition</code>：同 useTransition，命令式版本</li>
+          <li><code>Suspense + streaming SSR</code>：服务端流式传输 HTML</li>
+        </ul>
+        <pre>const [isPending, startTransition] = useTransition()
+startTransition(() => {
+  setFilter(input) // 低优先级更新，不阻塞输入
+})</pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- 状态管理 -->
+  <div class="category" style="animation-delay:0.25s">
+    <div class="category-header">
+      <span class="category-num">04</span>
+      <span class="category-title">状态管理</span>
+      <div class="category-line"></div>
+    </div>
+
+    <div class="question-card" data-level="easy" onclick="toggle(this)">
+      <div class="q-header">
+        <span class="q-num">Q13</span>
+        <div class="q-content">
+          <div class="q-title">Context API 的使用与性能问题如何解决？</div>
+          <div class="q-meta"><span class="badge easy">初级</span><span class="q-tag">Context</span></div>
+        </div>
+        <span class="q-arrow">▶</span>
+      </div>
+      <div class="q-answer">
+        Context 解决 prop drilling 问题，但 Context value 变化会导致<strong>所有消费者重渲染</strong>。<br><br>
+        <strong>优化策略：</strong>
+        <ul>
+          <li>拆分 Context（将频繁变化的值与稳定的值分开）</li>
+          <li>用 <code>useMemo</code> 包裹 value 对象，避免每次渲染都创建新引用</li>
+          <li>消费者组件用 <code>React.memo</code> 包裹</li>
+          <li>数据量大时考虑 Zustand/Jotai 等原子化状态库</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="question-card" data-level="medium" onclick="toggle(this)">
+      <div class="q-header">
+        <span class="q-num">Q14</span>
+        <div class="q-content">
+          <div class="q-title">Redux 的核心原则及与 Zustand 的对比？</div>
+          <div class="q-meta"><span class="badge medium">中级</span><span class="q-tag">状态管理</span></div>
+        </div>
+        <span class="q-arrow">▶</span>
+      </div>
+      <div class="q-answer">
+        <strong>Redux 三原则：</strong>单一数据源、State 只读（通过 action 修改）、纯函数 reducer。<br><br>
+        <strong>Zustand 对比：</strong>
+        <ul>
+          <li>API 更简洁，无 action/reducer 样板代码</li>
+          <li>天然支持细粒度订阅（selector），避免无关重渲染</li>
+          <li>不依赖 Provider 包裹</li>
+          <li>中小项目首选；Redux Toolkit 在大型团队协作和 devtools 方面更成熟</li>
+        </ul>
+        <pre>const useStore = create(set => ({
+  count: 0,
+  inc: () => set(s => ({ count: s.count + 1 }))
+}))</pre>
+      </div>
+    </div>
+
+    <div class="question-card" data-level="medium" onclick="toggle(this)">
+      <div class="q-header">
+        <span class="q-num">Q15</span>
+        <div class="q-content">
+          <div class="q-title">useState 与 useReducer 如何选择？</div>
+          <div class="q-meta"><span class="badge medium">中级</span><span class="q-tag">状态管理</span></div>
+        </div>
+        <span class="q-arrow">▶</span>
+      </div>
+      <div class="q-answer">
+        <strong>useState 适合：</strong>简单独立的状态，如 toggle、输入值、计数器。<br><br>
+        <strong>useReducer 适合：</strong>
+        <ul>
+          <li>状态对象包含多个字段，且更新逻辑复杂</li>
+          <li>下一个状态依赖多个当前状态字段</li>
+          <li>需要集中管理状态转换逻辑（便于测试）</li>
+        </ul>
+        经验规则：当你发现在 useState 里写了超过 3 个相关 state 且频繁一起更新时，考虑 useReducer。
+      </div>
+    </div>
+  </div>
+
+  <!-- 原理深度 -->
+  <div class="category" style="animation-delay:0.3s">
+    <div class="category-header">
+      <span class="category-num">05</span>
+      <span class="category-title">原理深度</span>
+      <div class="category-line"></div>
+    </div>
+
+    <div class="question-card" data-level="hard" onclick="toggle(this)">
+      <div class="q-header">
+        <span class="q-num">Q16</span>
+        <div class="q-content">
+          <div class="q-title">React Fiber 架构解决了什么问题？</div>
+          <div class="q-meta"><span class="badge hard">高级</span><span class="q-tag">Fiber · 架构</span></div>
+        </div>
+        <span class="q-arrow">▶</span>
+      </div>
+      <div class="q-answer">
+        React 15 使用递归同步渲染，一旦开始无法中断，大型组件树更新会导致主线程长时间阻塞，页面卡顿掉帧。<br><br>
+        <strong>Fiber 解决方案：</strong>
+        <ul>
+          <li>将渲染工作拆分为可中断的小单元（Fiber 节点）</li>
+          <li>基于优先级调度（Lane 模型），高优先级任务可打断低优先级任务</li>
+          <li>两个阶段：Render 阶段（可中断）→ Commit 阶段（不可中断）</li>
+          <li>双缓冲技术：current tree 和 workInProgress tree 交替使用</li>
+        </ul>
+        这是 Concurrent Mode 的基础设施。
+      </div>
+    </div>
+
+    <div class="question-card" data-level="hard" onclick="toggle(this)">
+      <div class="q-header">
+        <span class="q-num">Q17</span>
+        <div class="q-content">
+          <div class="q-title">React 的合成事件系统是什么？为什么这样设计？</div>
+          <div class="q-meta"><span class="badge hard">高级</span><span class="q-tag">事件系统</span></div>
+        </div>
+        <span class="q-arrow">▶</span>
+      </div>
+      <div class="q-answer">
+        React 将所有原生事件统一代理到根节点（React 17+ 是 root container，之前是 document），通过事件冒泡统一处理，并封装为跨浏览器一致的 <strong>SyntheticEvent</strong>。<br><br>
+        <strong>设计优势：</strong>
+        <ul>
+          <li>跨浏览器兼容性（磨平差异）</li>
+          <li>事件池复用（React 16，减少 GC 压力）</li>
+          <li>统一管理，便于实现并发模式下的优先级调度</li>
+          <li>React 17 后不再冒泡到 document，修复了与第三方库的兼容问题</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="question-card" data-level="hard" onclick="toggle(this)">
+      <div class="q-header">
+        <span class="q-num">Q18</span>
+        <div class="q-content">
+          <div class="q-title">解释 React 的 Diff 算法策略（三个假设）</div>
+          <div class="q-meta"><span class="badge hard">高级</span><span class="q-tag">Diff 算法</span></div>
+        </div>
+        <span class="q-arrow">▶</span>
+      </div>
+      <div class="q-answer">
+        标准树 Diff 复杂度 O(n³)，React 基于三个启发式假设将其降至 O(n)：<br><br>
+        <ul>
+          <li><strong>假设1 - 层级比较：</strong>只对同层节点进行比较，跨层级移动直接删除重建（实际场景极少跨层移动）</li>
+          <li><strong>假设2 - 类型判断：</strong>不同类型的元素产生完全不同的树，直接销毁旧树重建新树</li>
+          <li><strong>假设3 - key 优化：</strong>列表元素提供 key 时，通过 key 识别同一元素的移动，而非删除重建</li>
+        </ul>
+        这三个假设在 99% 的实际 UI 场景中成立，是 React 高效更新的核心。
+      </div>
+    </div>
+
+    <div class="question-card" data-level="easy" onclick="toggle(this)">
+      <div class="q-header">
+        <span class="q-num">Q19</span>
+        <div class="q-content">
+          <div class="q-title">React 组件的生命周期（函数组件版）对应关系？</div>
+          <div class="q-meta"><span class="badge easy">初级</span><span class="q-tag">生命周期</span></div>
+        </div>
+        <span class="q-arrow">▶</span>
+      </div>
+      <div class="q-answer">
+        <pre>// 挂载 (componentDidMount)
+useEffect(() => { ... }, [])
+
+// 更新 (componentDidUpdate)
+useEffect(() => { ... }, [dep])
+
+// 卸载 (componentWillUnmount)
+useEffect(() => {
+  return () => { /* 清理 */ }
+}, [])
+
+// getDerivedStateFromProps
+// → 渲染期间直接计算（无副作用）
+const derived = useMemo(() => compute(props), [props.x])</pre>
+        函数组件没有 <code>shouldComponentUpdate</code>，用 <code>React.memo</code> 替代。
+      </div>
+    </div>
+
+    <div class="question-card" data-level="easy" onclick="toggle(this)">
+      <div class="q-header">
+        <span class="q-num">Q20</span>
+        <div class="q-content">
+          <div class="q-title">什么是 Error Boundary？函数组件如何实现？</div>
+          <div class="q-meta"><span class="badge easy">初级</span><span class="q-tag">错误处理</span></div>
+        </div>
+        <span class="q-arrow">▶</span>
+      </div>
+      <div class="q-answer">
+        Error Boundary 是捕获子组件渲染错误的机制，防止整个应用崩溃。目前<strong>只能用类组件</strong>实现（通过 <code>componentDidCatch</code> 和 <code>getDerivedStateFromError</code>）。<br><br>
+        函数组件可使用第三方库 <code>react-error-boundary</code>：<br><br>
+        <pre>import { ErrorBoundary } from 'react-error-boundary'
+
+&lt;ErrorBoundary fallback={&lt;div&gt;出错了&lt;/div&gt;}&gt;
+  &lt;RiskyComponent /&gt;
+&lt;/ErrorBoundary&gt;</pre>
+        <strong>注意：</strong>Error Boundary 不能捕获异步错误、事件处理器中的错误。
+      </div>
+    </div>
+
+    <div class="question-card" data-level="medium" onclick="toggle(this)">
+      <div class="q-header">
+        <span class="q-num">Q21</span>
+        <div class="q-content">
+          <div class="q-title">描述一次完整的 React 渲染流程</div>
+          <div class="q-meta"><span class="badge medium">中级</span><span class="q-tag">渲染原理</span></div>
+        </div>
+        <span class="q-arrow">▶</span>
+      </div>
+      <div class="q-answer">
+        <strong>触发（Trigger）→ 渲染（Render）→ 提交（Commit）</strong><br><br>
+        <ul>
+          <li><strong>触发：</strong>初始渲染 / setState / forceUpdate 触发调度</li>
+          <li><strong>Render 阶段（可中断）：</strong>从根节点开始，调用函数组件（执行 Hooks）生成新 Fiber 树，与旧树 Diff，收集副作用列表</li>
+          <li><strong>Commit 阶段（不可中断）：</strong>
+            <ul>
+              <li>BeforeMutation：执行 getSnapshotBeforeUpdate</li>
+              <li>Mutation：DOM 操作（插入/更新/删除）</li>
+              <li>Layout：执行 useLayoutEffect，更新 refs</li>
+            </ul>
+          </li>
+          <li><strong>异步：</strong>浏览器绘制后，执行 useEffect</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="question-card" data-level="medium" onclick="toggle(this)">
+      <div class="q-header">
+        <span class="q-num">Q22</span>
+        <div class="q-content">
+          <div class="q-title">useLayoutEffect 与 useEffect 的区别？</div>
+          <div class="q-meta"><span class="badge medium">中级</span><span class="q-tag">Hooks · 渲染</span></div>
+        </div>
+        <span class="q-arrow">▶</span>
+      </div>
+      <div class="q-answer">
+        <strong>执行时机不同：</strong>
+        <ul>
+          <li><code>useLayoutEffect</code>：DOM 更新后、浏览器绘制<strong>前</strong>同步执行（阻塞绘制）</li>
+          <li><code>useEffect</code>：浏览器绘制<strong>后</strong>异步执行</li>
+        </ul>
+        <strong>适用场景：</strong>
+        <ul>
+          <li>需要在用户看到更新前读取/修改 DOM 布局（如测量尺寸、避免闪烁），用 <code>useLayoutEffect</code></li>
+          <li>数据请求、订阅、日志等副作用，用 <code>useEffect</code>（避免阻塞渲染）</li>
+        </ul>
+        SSR 场景下 <code>useLayoutEffect</code> 会警告，需条件使用。
+      </div>
+    </div>
+
+    <div class="question-card" data-level="medium" onclick="toggle(this)">
+      <div class="q-header">
+        <span class="q-num">Q23</span>
+        <div class="q-content">
+          <div class="q-title">React Portals 是什么，典型应用场景？</div>
+          <div class="q-meta"><span class="badge medium">中级</span><span class="q-tag">Portal</span></div>
+        </div>
+        <span class="q-arrow">▶</span>
+      </div>
+      <div class="q-answer">
+        <code>createPortal</code> 允许将子组件渲染到父组件 DOM 层级之外的节点，但事件冒泡仍遵循 React 组件树（而非 DOM 树）。<br><br>
+        <pre>import { createPortal } from 'react-dom'
+return createPortal(&lt;Modal /&gt;, document.body)</pre>
+        <strong>典型场景：</strong>Modal 弹窗（避免 overflow:hidden 裁剪）、Tooltip（避免 z-index 层叠问题）、全屏 Drawer。
+      </div>
+    </div>
+
+    <div class="question-card" data-level="hard" onclick="toggle(this)">
+      <div class="q-header">
+        <span class="q-num">Q24</span>
+        <div class="q-content">
+          <div class="q-title">如何排查和解决 React 应用的性能瓶颈？</div>
+          <div class="q-meta"><span class="badge hard">高级</span><span class="q-tag">性能 · 工程</span></div>
+        </div>
+        <span class="q-arrow">▶</span>
+      </div>
+      <div class="q-answer">
+        <strong>排查工具：</strong>
+        <ul>
+          <li>React DevTools Profiler：录制渲染，查看哪些组件重渲染及耗时</li>
+          <li>Chrome Performance 面板：查看长任务、Layout 抖动</li>
+          <li><code>why-did-you-render</code> 库：自动检测不必要的重渲染</li>
+        </ul>
+        <strong>常见优化手段：</strong>
+        <ul>
+          <li>React.memo + useCallback/useMemo 减少子组件重渲染</li>
+          <li>虚拟列表（react-window）处理大量列表项</li>
+          <li>懒加载 + Suspense 减小初始包体积</li>
+          <li>状态下移（将 state 放到真正需要它的组件）</li>
+          <li>批量更新（React 18 自动批处理）</li>
+          <li>避免在渲染函数中创建新对象/函数</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="question-card" data-level="hard" onclick="toggle(this)">
+      <div class="q-header">
+        <span class="q-num">Q25</span>
+        <div class="q-content">
+          <div class="q-title">React Server Components (RSC) 与客户端组件的区别？</div>
+          <div class="q-meta"><span class="badge hard">高级</span><span class="q-tag">React 19 · SSR</span></div>
+        </div>
+        <span class="q-arrow">▶</span>
+      </div>
+      <div class="q-answer">
+        <strong>服务端组件（RSC）：</strong>
+        <ul>
+          <li>在服务器上渲染，不发送 JS 到客户端，零 bundle 体积</li>
+          <li>可直接访问数据库、文件系统、私密 API</li>
+          <li><strong>不能</strong>使用 Hooks、事件处理、浏览器 API</li>
+          <li>适合：数据获取、静态内容、重型第三方库</li>
+        </ul>
+        <strong>客户端组件（'use client'）：</strong>
+        <ul>
+          <li>在浏览器执行，支持所有 Hooks 和交互</li>
+          <li>需要交互、状态、浏览器 API 时使用</li>
+        </ul>
+        RSC 是 Next.js 13+ App Router 的核心，可将客户端 JS 体积大幅减少。
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <span class="footer-logo">React Interview</span>
+    <span>共 25 题 · 点击展开答案</span>
+  </footer>
+
+</div>
+
+<script>
+  function toggle(card) {
+    card.classList.toggle('open')
+  }
+
+  function filterCards(level, btn) {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'))
+    btn.classList.add('active')
+    document.querySelectorAll('.question-card').forEach(card => {
+      if (level === 'all' || card.dataset.level === level) {
+        card.style.display = ''
+      } else {
+        card.style.display = 'none'
+      }
+    })
+    // Hide empty categories
+    document.querySelectorAll('.category').forEach(cat => {
+      const visible = [...cat.querySelectorAll('.question-card')].some(c => c.style.display !== 'none')
+      cat.style.display = visible ? '' : 'none'
+    })
+  }
+
+  function setTheme(dark) {
+    const icon = document.getElementById('theme-icon')
+    const label = document.getElementById('theme-label')
+    if (dark) {
+      document.documentElement.classList.add('dark')
+      icon.textContent = '☀️'
+      label.textContent = 'Light'
+    } else {
+      document.documentElement.classList.remove('dark')
+      icon.textContent = '🌙'
+      label.textContent = 'Dark'
+    }
+    try { localStorage.setItem('theme', dark ? 'dark' : 'light') } catch(e) {}
+  }
+
+  function toggleTheme() {
+    setTheme(!document.documentElement.classList.contains('dark'))
+  }
+
+  // Init: default light, respect saved preference
+  ;(function() {
+    try {
+      const saved = localStorage.getItem('theme')
+      if (saved === 'dark') setTheme(true)
+    } catch(e) {}
+  })()
+</script>
+</body>
+</html>

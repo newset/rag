@@ -1,0 +1,1129 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>罗杰 · 全栈工程师</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,300&family=Noto+Sans+SC:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root {
+  --white: #ffffff;
+  --bg: #f8f8fa;
+  --surface: #ffffff;
+  --border: #e8e8ee;
+  --border-hover: #c8c8d8;
+  --text: #111118;
+  --text-secondary: #555568;
+  --text-muted: #999aaa;
+  --accent: #1c1c2e;
+  --blue: #2563eb;
+  --blue-light: #eff3ff;
+  --blue-mid: #dbeafe;
+  --purple: #7c3aed;
+  --purple-light: #f5f3ff;
+  --teal: #0d9488;
+  --teal-light: #f0fdfa;
+  --orange: #ea580c;
+  --orange-light: #fff7ed;
+  --tag-border: #e2e8f0;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.06), 0 2px 6px rgba(0,0,0,0.04);
+  --shadow-lg: 0 12px 40px rgba(0,0,0,0.08), 0 4px 12px rgba(0,0,0,0.04);
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Noto Sans SC', 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ─── LAYOUT ─── */
+.page {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0 24px 120px;
+}
+
+/* ─── NAV BAR ─── */
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: rgba(255,255,255,0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 24px;
+}
+.topbar-inner {
+  max-width: 900px;
+  margin: 0 auto;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.topbar-logo {
+  font-family: 'DM Mono', monospace;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text);
+  letter-spacing: -0.01em;
+}
+.topbar-logo span {
+  color: var(--blue);
+}
+.topbar-links {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.topbar-link {
+  font-size: 13px;
+  color: var(--text-secondary);
+  text-decoration: none;
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  transition: background 0.15s, color 0.15s;
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 400;
+}
+.topbar-link:hover { background: var(--bg); color: var(--text); }
+.topbar-cta {
+  font-size: 13px;
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 500;
+  background: var(--text);
+  color: white;
+  text-decoration: none;
+  padding: 7px 16px;
+  border-radius: 100px;
+  transition: opacity 0.15s;
+}
+.topbar-cta:hover { opacity: 0.8; }
+
+/* ─── HERO ─── */
+.hero {
+  padding: 96px 0 80px;
+  text-align: center;
+  opacity: 0;
+  animation: fadeUp 0.8s 0.05s ease forwards;
+}
+
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 14px 5px 10px;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 100px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12.5px;
+  color: var(--text-secondary);
+  margin-bottom: 32px;
+  box-shadow: var(--shadow-sm);
+}
+.hero-badge-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #22c55e;
+  flex-shrink: 0;
+  box-shadow: 0 0 0 3px rgba(34,197,94,0.2);
+  animation: pulse 2s ease infinite;
+}
+@keyframes pulse {
+  0%,100% { box-shadow: 0 0 0 3px rgba(34,197,94,0.2); }
+  50% { box-shadow: 0 0 0 5px rgba(34,197,94,0.1); }
+}
+
+.hero-name {
+  font-family: 'DM Sans', sans-serif;
+  font-size: clamp(72px, 13vw, 116px);
+  font-weight: 700;
+  letter-spacing: -4px;
+  line-height: 0.92;
+  color: var(--text);
+  margin-bottom: 24px;
+}
+.hero-name .en {
+  display: block;
+  font-size: clamp(28px, 5vw, 44px);
+  font-weight: 300;
+  letter-spacing: -0.5px;
+  color: var(--text-muted);
+  margin-top: 10px;
+  font-style: italic;
+}
+
+.hero-tagline {
+  font-size: 17px;
+  color: var(--text-secondary);
+  font-weight: 300;
+  line-height: 1.6;
+  max-width: 480px;
+  margin: 0 auto 48px;
+  font-family: 'DM Sans', sans-serif;
+}
+
+.hero-stats-row {
+  display: inline-flex;
+  gap: 0;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  margin-bottom: 40px;
+  box-shadow: var(--shadow-sm);
+}
+.hero-stat {
+  padding: 18px 36px;
+  border-right: 1px solid var(--border);
+  text-align: center;
+}
+.hero-stat:last-child { border-right: none; }
+.hero-stat-num {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--text);
+  display: block;
+  letter-spacing: -1px;
+}
+.hero-stat-label {
+  font-size: 11px;
+  color: var(--text-muted);
+  letter-spacing: 0.5px;
+  display: block;
+  margin-top: 2px;
+  font-family: 'DM Mono', monospace;
+}
+
+.hero-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 22px;
+  border-radius: 100px;
+  font-size: 14px;
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 0.15s;
+  cursor: pointer;
+  border: none;
+}
+.btn-dark {
+  background: var(--text);
+  color: white;
+}
+.btn-dark:hover { opacity: 0.82; }
+.btn-outline {
+  background: white;
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+}
+.btn-outline:hover { border-color: var(--border-hover); color: var(--text); }
+
+/* ─── DIVIDER ─── */
+.divider {
+  height: 1px;
+  background: var(--border);
+  margin: 0;
+}
+
+/* ─── SECTION ─── */
+.section {
+  padding: 80px 0 0;
+  opacity: 0;
+  animation: fadeUp 0.7s ease forwards;
+}
+.section:nth-child(2) { animation-delay: 0.1s; }
+.section:nth-child(3) { animation-delay: 0.15s; }
+.section:nth-child(4) { animation-delay: 0.2s; }
+.section:nth-child(5) { animation-delay: 0.25s; }
+.section:nth-child(6) { animation-delay: 0.3s; }
+.section:nth-child(7) { animation-delay: 0.35s; }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: none; }
+}
+
+.section-eyebrow {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  color: var(--text-muted);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+.section-title {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 36px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: -1.5px;
+  line-height: 1.1;
+  margin-bottom: 40px;
+}
+.section-title small {
+  display: block;
+  font-size: 16px;
+  font-weight: 300;
+  color: var(--text-secondary);
+  letter-spacing: 0;
+  margin-top: 6px;
+}
+
+/* ─── TWO-COLUMN LAYOUT ─── */
+.two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+.three-col {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+/* ─── FEATURE CARDS (advantages) ─── */
+.feat-card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  transition: box-shadow 0.2s, border-color 0.2s, transform 0.2s;
+}
+.feat-card:hover {
+  border-color: var(--border-hover);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+.feat-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  margin-bottom: 14px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+}
+.feat-title {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 6px;
+  letter-spacing: -0.3px;
+}
+.feat-desc {
+  font-size: 13.5px;
+  color: var(--text-secondary);
+  line-height: 1.65;
+}
+
+/* ─── SKILLS ─── */
+.skills-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+.skill-row {
+  display: grid;
+  grid-template-columns: 100px 1fr;
+  gap: 16px;
+  align-items: start;
+  padding: 20px 0;
+  border-bottom: 1px solid var(--border);
+}
+.skill-row:last-child { border-bottom: none; }
+.skill-category {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  color: var(--text-muted);
+  letter-spacing: 0.5px;
+  padding-top: 4px;
+}
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+.tag {
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
+  padding: 4px 12px;
+  border-radius: 100px;
+  border: 1px solid var(--tag-border);
+  background: var(--white);
+  color: var(--text-secondary);
+  letter-spacing: -0.1px;
+  transition: all 0.15s;
+  cursor: default;
+}
+.tag:hover { border-color: var(--border-hover); color: var(--text); }
+.tag.blue { background: var(--blue-light); border-color: var(--blue-mid); color: var(--blue); }
+.tag.purple { background: var(--purple-light); border-color: #ddd6fe; color: var(--purple); }
+.tag.teal { background: var(--teal-light); border-color: #99f6e4; color: var(--teal); }
+.tag.orange { background: var(--orange-light); border-color: #fed7aa; color: var(--orange); }
+
+/* ─── EXPERIENCE TIMELINE ─── */
+.exp-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+.exp-item {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  gap: 32px;
+  padding: 32px 0;
+  border-bottom: 1px solid var(--border);
+  position: relative;
+}
+.exp-item:last-child { border-bottom: none; }
+.exp-meta {
+  padding-top: 3px;
+}
+.exp-period {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  color: var(--text-muted);
+  line-height: 1.6;
+  letter-spacing: -0.1px;
+}
+.exp-period .current {
+  color: #16a34a;
+  font-weight: 500;
+}
+.exp-body {}
+.exp-company {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text);
+  letter-spacing: -0.5px;
+  margin-bottom: 6px;
+}
+.exp-role {
+  display: inline-block;
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  padding: 3px 10px;
+  border-radius: 100px;
+  margin-bottom: 14px;
+  letter-spacing: 0.3px;
+}
+.exp-role.r1 { background: var(--blue-light); color: var(--blue); border: 1px solid var(--blue-mid); }
+.exp-role.r2 { background: var(--purple-light); color: var(--purple); border: 1px solid #ddd6fe; }
+.exp-role.r3 { background: var(--bg); color: var(--text-muted); border: 1px solid var(--border); }
+.exp-list-items {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+.exp-list-items li {
+  font-size: 13.5px;
+  color: var(--text-secondary);
+  line-height: 1.7;
+  padding-left: 16px;
+  position: relative;
+}
+.exp-list-items li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 10px;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--border-hover);
+}
+
+/* ─── PROJECT GRID ─── */
+.proj-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+.proj-card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  transition: all 0.2s;
+  position: relative;
+  overflow: hidden;
+}
+.proj-card:hover {
+  border-color: var(--border-hover);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+.proj-accent {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+}
+.proj-accent.blue { background: linear-gradient(90deg, #2563eb, #7c3aed); }
+.proj-accent.teal { background: linear-gradient(90deg, #0d9488, #059669); }
+.proj-accent.orange { background: linear-gradient(90deg, #ea580c, #dc2626); }
+.proj-accent.purple { background: linear-gradient(90deg, #7c3aed, #db2777); }
+.proj-period {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-bottom: 10px;
+  margin-top: 6px;
+}
+.proj-title {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text);
+  letter-spacing: -0.4px;
+  margin-bottom: 6px;
+}
+.proj-badge {
+  display: inline-block;
+  font-size: 11px;
+  font-family: 'DM Mono', monospace;
+  padding: 2px 9px;
+  border-radius: 100px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  margin-bottom: 12px;
+}
+.proj-desc {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.7;
+}
+.proj-desc ul {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-top: 8px;
+}
+.proj-desc ul li {
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+}
+.proj-desc ul li::before {
+  content: '↗';
+  color: var(--text-muted);
+  font-size: 10px;
+  flex-shrink: 0;
+  margin-top: 3px;
+}
+
+/* ─── EDUCATION ─── */
+.edu-card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 28px 32px;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  box-shadow: var(--shadow-sm);
+}
+.edu-mark {
+  width: 52px;
+  height: 52px;
+  border-radius: var(--radius-md);
+  background: var(--text);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  flex-shrink: 0;
+  letter-spacing: -0.5px;
+}
+.edu-school {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--text);
+  letter-spacing: -0.3px;
+  margin-bottom: 4px;
+}
+.edu-info {
+  font-size: 13.5px;
+  color: var(--text-secondary);
+  font-family: 'DM Sans', sans-serif;
+}
+
+/* ─── CONTACT ─── */
+.contact-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+.contact-card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  text-decoration: none;
+  transition: all 0.15s;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.contact-card:hover {
+  border-color: var(--border-hover);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+.contact-icon {
+  font-size: 20px;
+}
+.contact-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  color: var(--text-muted);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+.contact-value {
+  font-size: 13px;
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 500;
+}
+
+/* ─── FOOTER CTA ─── */
+.footer-cta {
+  margin-top: 96px;
+  text-align: center;
+  padding: 64px 40px;
+  background: var(--text);
+  border-radius: var(--radius-xl);
+  position: relative;
+  overflow: hidden;
+}
+.footer-cta::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 30% 50%, rgba(99,102,241,0.3) 0%, transparent 60%),
+              radial-gradient(ellipse at 70% 50%, rgba(20,184,166,0.2) 0%, transparent 60%);
+  pointer-events: none;
+}
+.footer-cta-eyebrow {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  color: rgba(255,255,255,0.4);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+  position: relative;
+}
+.footer-cta-title {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 36px;
+  font-weight: 700;
+  color: white;
+  letter-spacing: -1.5px;
+  line-height: 1.1;
+  margin-bottom: 32px;
+  position: relative;
+}
+.footer-cta-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  position: relative;
+}
+.btn-white {
+  background: white;
+  color: var(--text);
+  padding: 10px 22px;
+  border-radius: 100px;
+  font-size: 14px;
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 600;
+  text-decoration: none;
+  transition: opacity 0.15s;
+}
+.btn-white:hover { opacity: 0.9; }
+.btn-ghost-light {
+  background: rgba(255,255,255,0.1);
+  color: rgba(255,255,255,0.8);
+  border: 1px solid rgba(255,255,255,0.15);
+  padding: 10px 22px;
+  border-radius: 100px;
+  font-size: 14px;
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 0.15s;
+}
+.btn-ghost-light:hover { background: rgba(255,255,255,0.18); }
+
+.page-footer {
+  text-align: center;
+  padding-top: 48px;
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  color: var(--text-muted);
+  letter-spacing: 1px;
+}
+
+/* ─── SCROLL REVEAL ─── */
+.reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.65s ease, transform 0.65s ease;
+}
+.reveal.visible {
+  opacity: 1;
+  transform: none;
+}
+
+/* ─── RESPONSIVE ─── */
+@media (max-width: 680px) {
+  .hero-name { letter-spacing: -2px; }
+  .hero-stats-row { flex-direction: column; border-radius: var(--radius-lg); }
+  .hero-stat { border-right: none; border-bottom: 1px solid var(--border); }
+  .hero-stat:last-child { border-bottom: none; }
+  .two-col, .three-col, .proj-grid, .contact-grid { grid-template-columns: 1fr; }
+  .exp-item { grid-template-columns: 1fr; gap: 8px; }
+  .exp-meta { display: flex; align-items: center; gap: 12px; }
+  .topbar-links { display: none; }
+  .section-title { font-size: 28px; }
+}
+</style>
+</head>
+<body>
+
+<!-- TOP NAV -->
+<nav class="topbar">
+  <div class="topbar-inner">
+    <div class="topbar-logo">Roger<span>.</span>Luo</div>
+    <div class="topbar-links">
+      <a href="#about" class="topbar-link">优势</a>
+      <a href="#skills" class="topbar-link">技术栈</a>
+      <a href="#experience" class="topbar-link">经历</a>
+      <a href="#projects" class="topbar-link">项目</a>
+      <a href="tel:17781488769" class="topbar-cta">联系我</a>
+    </div>
+  </div>
+</nav>
+
+<div class="page">
+
+  <!-- HERO -->
+  <header class="hero">
+    <div class="hero-badge">
+      <div class="hero-badge-dot"></div>
+      全栈工程师 · 成都 · 求职中
+    </div>
+    <h1 class="hero-name">
+      罗杰
+      <span class="en">Roger Luo</span>
+    </h1>
+    <p class="hero-tagline">
+      14 年全栈工程经验，专注 AI 工程落地与前端架构，<br>从 Hybrid APP 到 LLM Agent 全链路可交付。
+    </p>
+    <div class="hero-stats-row">
+      <div class="hero-stat">
+        <span class="hero-stat-num">14</span>
+        <span class="hero-stat-label">年经验</span>
+      </div>
+      <div class="hero-stat">
+        <span class="hero-stat-num">8+</span>
+        <span class="hero-stat-label">主导项目</span>
+      </div>
+      <div class="hero-stat">
+        <span class="hero-stat-num">36</span>
+        <span class="hero-stat-label">岁</span>
+      </div>
+    </div>
+    <div class="hero-actions">
+      <a href="tel:17781488769" class="btn btn-dark">📱 17781488769</a>
+      <a href="mailto:910599438@qq.com" class="btn btn-outline">✉ 910599438@qq.com</a>
+      <a href="https://github.com/newset" class="btn btn-outline">⌥ GitHub</a>
+    </div>
+  </header>
+
+  <!-- ABOUT -->
+  <section class="section reveal" id="about">
+    <div class="section-eyebrow">01 · ABOUT</div>
+    <div class="section-title">个人优势<small>What I bring to the table</small></div>
+    <div class="two-col">
+      <div class="feat-card">
+        <div class="feat-icon">🤖</div>
+        <div class="feat-title">AI 工程落地</div>
+        <div class="feat-desc">主导团队 AI Coding 体系建设，掌握 Agent、RAG、Milvus 向量数据库，完成从设计到上线的全流程需求交付。</div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">🔭</div>
+        <div class="feat-title">技术视野广</div>
+        <div class="feat-desc">持续关注新技术趋势，具备开源贡献经验（remaxjs/remax），学习能力强，能快速掌握并应用新工具。</div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">🧩</div>
+        <div class="feat-title">低代码架构</div>
+        <div class="feat-desc">基于 LowcodeEngine 推动低代码业务落地，协同跨组共建 Vue 渲染器与物料库，制定业务接入规范。</div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">🗂</div>
+        <div class="feat-title">团队领导力</div>
+        <div class="feat-desc">有带团队经验，熟悉与设计、产品协作，定期组织技术培训，推动工程规范与 CI/CD 流程全面落地。</div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">⚙️</div>
+        <div class="feat-title">全栈交付能力</div>
+        <div class="feat-desc">掌握 Java Spring Boot、Python FastAPI，具备数据库设计、性能排查与服务端调试能力，全链路可闭环。</div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">🌐</div>
+        <div class="feat-title">国际化背景</div>
+        <div class="feat-desc">曾在国外主体公司全远程工作，英语六级（CET-6），跨文化协作无障碍，有开发者文档写作经验。</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SKILLS -->
+  <section class="section reveal" id="skills">
+    <div class="section-eyebrow">02 · SKILLS</div>
+    <div class="section-title">技术栈<small>Tech Stack & Tooling</small></div>
+    <div class="skills-layout">
+      <div class="skill-row">
+        <span class="skill-category">前端框架</span>
+        <div class="tags">
+          <span class="tag blue">React</span>
+          <span class="tag blue">React Native</span>
+          <span class="tag blue">Vue</span>
+          <span class="tag blue">Taro</span>
+          <span class="tag blue">Flutter</span>
+          <span class="tag blue">微信小程序</span>
+          <span class="tag blue">Angular</span>
+        </div>
+      </div>
+      <div class="skill-row">
+        <span class="skill-category">工程能力</span>
+        <div class="tags">
+          <span class="tag teal">Node.js</span>
+          <span class="tag teal">GraphQL</span>
+          <span class="tag teal">CI/CD</span>
+          <span class="tag teal">Docker</span>
+          <span class="tag teal">Kubernetes</span>
+          <span class="tag teal">LowcodeEngine</span>
+          <span class="tag teal">npm 包管理</span>
+          <span class="tag teal">Sentry</span>
+          <span class="tag teal">ClickHouse</span>
+        </div>
+      </div>
+      <div class="skill-row">
+        <span class="skill-category">AI & 后端</span>
+        <div class="tags">
+          <span class="tag purple">LangChain Agent</span>
+          <span class="tag purple">RAG</span>
+          <span class="tag purple">Milvus</span>
+          <span class="tag purple">Python / FastAPI</span>
+          <span class="tag purple">Java Spring Boot</span>
+          <span class="tag purple">MySQL</span>
+          <span class="tag purple">MongoDB</span>
+          <span class="tag purple">Hive</span>
+        </div>
+      </div>
+      <div class="skill-row">
+        <span class="skill-category">AI Coding</span>
+        <div class="tags">
+          <span class="tag orange">Cursor</span>
+          <span class="tag orange">Claude Code</span>
+          <span class="tag orange">Windsurf</span>
+          <span class="tag orange">Codex</span>
+          <span class="tag orange">OpenCode</span>
+          <span class="tag orange">CatPaw（美团内部）</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- EXPERIENCE -->
+  <section class="section reveal" id="experience">
+    <div class="section-eyebrow">03 · EXPERIENCE</div>
+    <div class="section-title">工作经历<small>Career History</small></div>
+    <div class="exp-list">
+
+      <div class="exp-item">
+        <div class="exp-meta">
+          <div class="exp-period"><span class="current">至今</span><br>2022.07</div>
+        </div>
+        <div class="exp-body">
+          <div class="exp-company">美团</div>
+          <span class="exp-role r1">前端开发工程师</span>
+          <ul class="exp-list-items">
+            <li>参与客服培训系统前端开发，完成功能模块搭建与优化，获业务团队认可</li>
+            <li>推动团队低代码平台落地，协同跨组共建能力，实现与团队框架及 UI 库兼容适配</li>
+            <li>主导 AI Coding 实践落地，完成培训业务全栈开发，沉淀 SOP 文档与知识库</li>
+            <li>参与建设业务 RAG，掌握 Milvus、LangChain Agent；具备 Java Spring Boot + MySQL 开发与调试能力</li>
+            <li>掌握服务端性能排查（日志平台 + Trace）及定时任务服务设计</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="exp-item">
+        <div class="exp-meta">
+          <div class="exp-period">2022.07<br>2017.02</div>
+        </div>
+        <div class="exp-body">
+          <div class="exp-company">企鹅医生（未来医生）</div>
+          <span class="exp-role r2">架构师</span>
+          <ul class="exp-list-items">
+            <li>主导 Hybrid APP / React Native 开发，搭建跨端开发体系，多项目成功落地</li>
+            <li>主导 Node GraphQL 服务，解决前端请求过多问题，显著提升数据访问速度</li>
+            <li>推进完善 CI/CD 流程；构建团队 npm 包生态；定期技术培训，提升团队整体水平</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="exp-item">
+        <div class="exp-meta">
+          <div class="exp-period">2017.02<br>2016.05</div>
+        </div>
+        <div class="exp-body">
+          <div class="exp-company">成都不凡布道</div>
+          <span class="exp-role r3">移动 Web 前端</span>
+          <ul class="exp-list-items">
+            <li>移动端商城及管理端开发，主要技术栈 Angular</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="exp-item">
+        <div class="exp-meta">
+          <div class="exp-period">2016.03<br>2015.02</div>
+        </div>
+        <div class="exp-body">
+          <div class="exp-company">成都微众创想（开课吧）</div>
+          <span class="exp-role r3">前端组长</span>
+          <ul class="exp-list-items">
+            <li>开课吧 H5 版开发（Koa/Express）；产品壹佰前端重构，页面加载从 4–5s 优化至 2s</li>
+            <li>指导初级前端成长，规划公司通用组件库与开发框架</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="exp-item">
+        <div class="exp-meta">
+          <div class="exp-period">2015.01<br>2013.10</div>
+        </div>
+        <div class="exp-body">
+          <div class="exp-company">Nimbusbase</div>
+          <span class="exp-role r3">前端工程师（全远程）</span>
+          <ul class="exp-list-items">
+            <li>基于 Dropbox / Google Drive 的存储 SDK 开发及示例应用、开发者文档</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="exp-item">
+        <div class="exp-meta">
+          <div class="exp-period">2013.10<br>2012.09</div>
+        </div>
+        <div class="exp-body">
+          <div class="exp-company">重庆砹点科技</div>
+          <span class="exp-role r3">前端工程师（首份工作）</span>
+          <ul class="exp-list-items">
+            <li>移动应用后台管理系统及接口维护；承担两个 App 的 iOS 端开发</li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- PROJECTS -->
+  <section class="section reveal" id="projects">
+    <div class="section-eyebrow">04 · PROJECTS</div>
+    <div class="section-title">项目经历<small>Selected Work</small></div>
+    <div class="proj-grid">
+
+      <div class="proj-card">
+        <div class="proj-accent blue"></div>
+        <div class="proj-period">2024.11 — 2026.03 · 美团</div>
+        <div class="proj-title">AI Coding 业务实践与能力建设</div>
+        <span class="proj-badge">负责人</span>
+        <div class="proj-desc">
+          主导 AI 辅助编码工具在前端及全栈场景的规模化落地。
+          <ul>
+            <li>深度对比 Cursor、Claude Code、Windsurf 等，设计三阶段推进路径</li>
+            <li>参与开发 IDE 扩展插件，打通初始化→设计→开发→评审→上线全链路</li>
+            <li>输出内部技术文档与 SOP，显著缩短重复编码时间，成功在团队推广</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="proj-card">
+        <div class="proj-accent purple"></div>
+        <div class="proj-period">2022.12 — 2024.09 · 美团</div>
+        <div class="proj-title">低代码平台业务推进</div>
+        <span class="proj-badge">负责人</span>
+        <div class="proj-desc">
+          基于 LowcodeEngine + vue-renderer 推动低代码能力建设与业务落地。
+          <ul>
+            <li>对接基础研发，共建低代码 Vue 渲染器及物料组件</li>
+            <li>制定业务接入标准与评定规范，保证稳定迁移过渡</li>
+            <li>沉淀物料库与新人入门资料</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="proj-card">
+        <div class="proj-accent teal"></div>
+        <div class="proj-period">2021.04 — 2021.11 · 企鹅医生</div>
+        <div class="proj-title">跨端开发体系建设</div>
+        <span class="proj-badge">架构师</span>
+        <div class="proj-desc">
+          设计 H5 + 小程序跨端工程体系，多业务项目成功落地持续维护。
+          <ul>
+            <li>搭建包管理与组件规范；设计 fastlane-cli 规范 CI 构建</li>
+            <li>制定通用主题与样式规范，跨业务复用</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="proj-card">
+        <div class="proj-accent orange"></div>
+        <div class="proj-period">2020.06 — 2021.05 · 企鹅医生</div>
+        <div class="proj-title">大前端体系建设</div>
+        <span class="proj-badge">架构师</span>
+        <div class="proj-desc">
+          从开发规范、构建发布、线上监控三维度提升研发效率。
+          <ul>
+            <li>统一 eslint 配置及各端脚手架；联合运维建设发布系统</li>
+            <li>整合 Sentry + 自研监控平台，快速定位线上故障</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="proj-card">
+        <div class="proj-accent blue"></div>
+        <div class="proj-period">2019.07 — 2020.11 · 企鹅医生</div>
+        <div class="proj-title">前端监控与发布平台</div>
+        <span class="proj-badge">项目 Owner</span>
+        <div class="proj-desc">
+          Node.js + MongoDB（后引入 ClickHouse）自研错误上报平台；发布平台支持运行时配置、多分支、多域名部署。
+        </div>
+      </div>
+
+      <div class="proj-card">
+        <div class="proj-accent purple"></div>
+        <div class="proj-period">2017.08 — 2019.05 · 企鹅医生</div>
+        <div class="proj-title">企鹅健康 App & 商城</div>
+        <span class="proj-badge">前端 Owner</span>
+        <div class="proj-desc">
+          基于 Taro 搭建小程序框架，整合状态管理、路由、授权；设计 Hybrid 通信方案，制定架构文档与开发规范。
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- EDUCATION -->
+  <section class="section reveal" id="education">
+    <div class="section-eyebrow">05 · EDUCATION</div>
+    <div class="section-title">教育背景<small>Academic Background</small></div>
+    <div class="edu-card">
+      <div class="edu-mark">西南</div>
+      <div>
+        <div class="edu-school">西南大学</div>
+        <div class="edu-info">本科 · 自动化 &nbsp;·&nbsp; 2008 — 2012 &nbsp;·&nbsp; 大学英语六级 CET-6</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTACT -->
+  <section class="section reveal" id="contact">
+    <div class="section-eyebrow">06 · CONTACT</div>
+    <div class="section-title">联系方式<small>Get in Touch</small></div>
+    <div class="contact-grid">
+      <a href="tel:17781488769" class="contact-card">
+        <div class="contact-icon">📱</div>
+        <div class="contact-label">Phone</div>
+        <div class="contact-value">17781488769</div>
+      </a>
+      <a href="mailto:910599438@qq.com" class="contact-card">
+        <div class="contact-icon">✉</div>
+        <div class="contact-label">Email</div>
+        <div class="contact-value">910599438@qq.com</div>
+      </a>
+      <a href="https://github.com/newset" class="contact-card">
+        <div class="contact-icon">⌥</div>
+        <div class="contact-label">GitHub</div>
+        <div class="contact-value">github.com/newset</div>
+      </a>
+      <div class="contact-card">
+        <div class="contact-icon">📍</div>
+        <div class="contact-label">Location</div>
+        <div class="contact-value">成都</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER CTA -->
+  <div class="footer-cta reveal">
+    <div class="footer-cta-eyebrow">READY TO COLLABORATE</div>
+    <div class="footer-cta-title">一起做一些好东西。</div>
+    <div class="footer-cta-actions">
+      <a href="tel:17781488769" class="btn-white">📱 立即致电</a>
+      <a href="mailto:910599438@qq.com" class="btn-ghost-light">✉ 发送邮件</a>
+    </div>
+  </div>
+
+  <div class="page-footer">ROGER LUO &nbsp;·&nbsp; FULLSTACK ENGINEER &nbsp;·&nbsp; 2026</div>
+
+</div>
+
+<script>
+const els = document.querySelectorAll('.reveal');
+const io = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.classList.add('visible');
+      io.unobserve(e.target);
+    }
+  });
+}, { threshold: 0.06 });
+els.forEach(el => io.observe(el));
+</script>
+</body>
+</html>

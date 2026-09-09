@@ -1,0 +1,451 @@
+<title>Webpack 与 Vite 核心概念</title>
+<style>
+  :root{
+    --bg:#F5F6F8;
+    --surface:#FFFFFF;
+    --surface-2:#EEF0F4;
+    --ink:#13151A;
+    --ink-dim:#565D6B;
+    --ink-faint:#8991A1;
+    --border:#DBDFE6;
+    --border-soft:#E7E9EE;
+    --webpack:#1E6FE0;
+    --webpack-soft:#E7F0FE;
+    --webpack-ink:#0F4FB0;
+    --vite:#6E56CF;
+    --vite-soft:#F0ECFC;
+    --vite-ink:#5539B5;
+    --rust:#B5451B;
+    --rust-soft:#FBEAE1;
+    --rust-ink:#8F3714;
+    --code-bg:#12141A;
+    --code-ink:#DCE1EA;
+    --shadow: 0 1px 2px rgba(20,22,30,0.04), 0 6px 20px rgba(20,22,30,0.06);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#0E1014;
+      --surface:#161923;
+      --surface-2:#1D212C;
+      --ink:#E9EBF1;
+      --ink-dim:#A2AAB8;
+      --ink-faint:#6E7686;
+      --border:#2A2F3B;
+      --border-soft:#232732;
+      --webpack:#6FA6F5;
+      --webpack-soft:#182C4A;
+      --webpack-ink:#9BC2FA;
+      --vite:#B4A2F5;
+      --vite-soft:#2A2244;
+      --vite-ink:#C9BCF8;
+      --rust:#E08A5E;
+      --rust-soft:#3A2418;
+      --rust-ink:#F0AC85;
+      --code-bg:#0A0B0F;
+      --code-ink:#D8DEE9;
+      --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 24px rgba(0,0,0,0.35);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#0E1014;
+    --surface:#161923;
+    --surface-2:#1D212C;
+    --ink:#E9EBF1;
+    --ink-dim:#A2AAB8;
+    --ink-faint:#6E7686;
+    --border:#2A2F3B;
+    --border-soft:#232732;
+    --webpack:#6FA6F5;
+    --webpack-soft:#182C4A;
+    --webpack-ink:#9BC2FA;
+    --vite:#B4A2F5;
+    --vite-soft:#2A2244;
+    --vite-ink:#C9BCF8;
+    --rust:#E08A5E;
+    --rust-soft:#3A2418;
+    --rust-ink:#F0AC85;
+    --code-bg:#0A0B0F;
+    --code-ink:#D8DEE9;
+    --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 24px rgba(0,0,0,0.35);
+  }
+
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'IBM Plex Sans', -apple-system, "Segoe UI", sans-serif;
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,h4{
+    font-family:'Sora', 'IBM Plex Sans', sans-serif;
+    text-wrap:balance;
+    margin:0 0 .5em 0;
+    color:var(--ink);
+    font-weight:650;
+  }
+  code, pre, .mono{
+    font-family:'IBM Plex Mono', ui-monospace, SFMono-Regular, monospace;
+  }
+  a{color:inherit;}
+  p{margin:0 0 1em 0;}
+  .wrap{max-width:920px;margin:0 auto;padding:0 24px 96px;}
+
+  /* header */
+  header.top{
+    padding:56px 24px 28px;
+    border-bottom:1px solid var(--border-soft);
+    background:
+      radial-gradient(720px 200px at 12% -10%, color-mix(in srgb, var(--webpack) 10%, transparent), transparent 70%),
+      radial-gradient(720px 220px at 88% -20%, color-mix(in srgb, var(--vite) 12%, transparent), transparent 70%);
+  }
+  header.top .wrap{padding-bottom:0;}
+  .eyebrow{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12.5px;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    color:var(--ink-faint);
+    margin-bottom:14px;
+  }
+  h1.title{font-size:clamp(28px,4vw,38px);letter-spacing:-0.01em;}
+  .subtitle{color:var(--ink-dim);font-size:16.5px;max-width:640px;margin-top:6px;}
+
+  nav.toc{
+    position:sticky;top:0;z-index:5;
+    background:color-mix(in srgb, var(--bg) 88%, transparent);
+    backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--border-soft);
+  }
+  nav.toc .wrap{
+    display:flex;gap:4px;padding:10px 24px;overflow-x:auto;
+  }
+  nav.toc a{
+    flex:0 0 auto;
+    font-size:13.5px;
+    color:var(--ink-dim);
+    text-decoration:none;
+    padding:6px 12px;
+    border-radius:99px;
+    white-space:nowrap;
+  }
+  nav.toc a:hover{background:var(--surface-2);color:var(--ink);}
+
+  section{padding:52px 0;border-bottom:1px solid var(--border-soft);}
+  section:last-of-type{border-bottom:none;}
+  .section-head{display:flex;align-items:baseline;gap:12px;margin-bottom:8px;}
+  .tag{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11.5px;
+    letter-spacing:.06em;
+    padding:3px 9px;
+    border-radius:6px;
+    font-weight:600;
+  }
+  .tag.webpack{background:var(--webpack-soft);color:var(--webpack-ink);}
+  .tag.vite{background:var(--vite-soft);color:var(--vite-ink);}
+  .tag.rust{background:var(--rust-soft);color:var(--rust-ink);}
+  .lede{color:var(--ink-dim);max-width:680px;margin-bottom:28px;}
+
+  /* concept cards */
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+  @media (max-width:720px){.grid2{grid-template-columns:1fr;}}
+  .card{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:14px;
+    padding:22px 22px 20px;
+    box-shadow:var(--shadow);
+  }
+  .card.webpack{border-top:3px solid var(--webpack);}
+  .card.vite{border-top:3px solid var(--vite);}
+  .card h3{font-size:18px;display:flex;align-items:center;gap:8px;}
+  .card h3 .mono{font-size:13px;color:var(--ink-faint);font-weight:400;}
+  .card ul{margin:12px 0 14px;padding-left:20px;}
+  .card li{margin-bottom:7px;color:var(--ink);font-size:14.8px;}
+  .card li b{font-weight:600;}
+  .card p{font-size:14.8px;color:var(--ink);}
+
+  pre{
+    background:var(--code-bg);
+    color:var(--code-ink);
+    border-radius:10px;
+    padding:14px 16px;
+    overflow-x:auto;
+    font-size:13px;
+    line-height:1.55;
+    margin:10px 0 0;
+  }
+  pre .c{color:#8992A5;}
+  pre .k{color:#C6A0F6;}
+  pre .s{color:#A6DA95;}
+  pre .fn{color:#8AADF4;}
+
+  table{
+    width:100%;
+    border-collapse:collapse;
+    font-size:14.5px;
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:12px;
+    overflow:hidden;
+  }
+  .tablewrap{overflow-x:auto;border-radius:12px;border:1px solid var(--border);box-shadow:var(--shadow);}
+  .tablewrap table{border:none;border-radius:0;}
+  th,td{
+    text-align:left;
+    padding:12px 16px;
+    border-bottom:1px solid var(--border-soft);
+    vertical-align:top;
+  }
+  thead th{
+    background:var(--surface-2);
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12px;
+    letter-spacing:.04em;
+    text-transform:uppercase;
+    color:var(--ink-dim);
+    font-weight:600;
+  }
+  tbody tr:last-child td{border-bottom:none;}
+  td.webpack-col{border-left:2px solid var(--webpack-soft);}
+  td.vite-col{border-left:2px solid var(--vite-soft);}
+
+  /* timeline */
+  .timeline{position:relative;margin-top:8px;}
+  .timeline::before{
+    content:"";position:absolute;left:39px;top:6px;bottom:6px;width:2px;
+    background:linear-gradient(var(--webpack), var(--vite) 55%, var(--rust));
+    opacity:.35;
+  }
+  .tl-item{position:relative;padding-left:88px;margin-bottom:26px;}
+  .tl-item:last-child{margin-bottom:0;}
+  .tl-dot{
+    position:absolute;left:28px;top:2px;width:24px;height:24px;
+    border-radius:50%;background:var(--surface);border:2px solid var(--border);
+    display:flex;align-items:center;justify-content:center;
+    font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--ink-faint);
+  }
+  .tl-item.mark .tl-dot{border-color:var(--rust);color:var(--rust-ink);background:var(--rust-soft);}
+  .tl-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:4px;}
+  .tl-ver{font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:15px;}
+  .tl-date{color:var(--ink-faint);font-size:13px;}
+  .tl-item p{font-size:14.6px;color:var(--ink-dim);margin:0;max-width:620px;}
+
+  .callout{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-left:3px solid var(--rust);
+    border-radius:10px;
+    padding:18px 20px;
+    margin-top:24px;
+    box-shadow:var(--shadow);
+  }
+  .callout h4{font-size:14.5px;color:var(--rust-ink);margin-bottom:8px;font-family:'IBM Plex Mono',monospace;letter-spacing:.02em;text-transform:uppercase;font-size:12px;}
+  .callout p{font-size:14.8px;color:var(--ink);margin:0 0 10px;}
+  .callout p:last-child{margin-bottom:0;}
+
+  footer{padding:32px 24px 60px;color:var(--ink-faint);font-size:13px;}
+  footer .wrap{border-top:1px solid var(--border-soft);padding-top:20px;}
+  footer a{color:var(--ink-dim);}
+</style>
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@500;650;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+
+<header class="top">
+  <div class="wrap">
+    <div class="eyebrow">面试复习笔记 · 前端构建工具</div>
+    <h1 class="title">Webpack 与 Vite：核心概念与架构演进</h1>
+    <p class="subtitle">Loader / Plugin 是什么、二者的边界在哪；Vite 对应了哪些概念；以及 Vite 从 esbuild + Rollup 双引擎走向 Rolldown 统一引擎的完整脉络。</p>
+  </div>
+</header>
+
+<nav class="toc">
+  <div class="wrap">
+    <a href="#webpack">Webpack 核心概念</a>
+    <a href="#vite">Vite 核心概念</a>
+    <a href="#compare">对照与本质区别</a>
+    <a href="#evolution">Vite 版本演进</a>
+    <a href="#modules">核心模块演进</a>
+  </div>
+</nav>
+
+<div class="wrap">
+
+<section id="webpack">
+  <div class="section-head"><span class="tag webpack">WEBPACK</span></div>
+  <h2>Loader 与 Plugin：两套完全不同的扩展机制</h2>
+  <p class="lede">Webpack 的心智模型是"先构建完整依赖图，再统一打包"。Compiler 是全局唯一、贯穿整个生命周期的对象，持有完整配置；每次编译（watch 模式下每次重新编译）都会创建一个新的 <span class="mono">Compilation</span> 实例，记录当次构建的模块、依赖图、chunk 与产物信息。两者都基于 <span class="mono">Tapable</span> 这套事件流库暴露 hook —— Loader 和 Plugin 正是挂在这套 hook 体系两个不同粒度上的扩展点。</p>
+
+  <div class="grid2">
+    <div class="card webpack">
+      <h3>Loader <span class="mono">单文件转换器</span></h3>
+      <p>本质是一个接收源码、返回转换后源码的 Node 函数，作用范围是<b>单个模块</b>，感知不到整个依赖图。</p>
+      <ul>
+        <li><b>职责</b>：把"非 JS 语义"的资源转成 webpack 能处理的 JS 模块 —— <span class="mono">babel-loader</span>（ES6+ → 兼容语法）、<span class="mono">ts-loader</span>、<span class="mono">css-loader/style-loader</span>、<span class="mono">vue-loader</span>、asset modules（替代旧版 <span class="mono">file-loader</span>/<span class="mono">url-loader</span>）。</li>
+        <li><b>执行顺序</b>：数组从右到左、从下到上链式调用；每个 loader 还有 pitch 阶段，先从左到右跑一遍（用于提前拦截/短路后续 loader）。</li>
+        <li><b>接口</b>：<span class="mono">this.async()</span> 声明异步、<span class="mono">this.getOptions()</span> 取配置、可返回 source map。</li>
+      </ul>
+      <pre><span class="c">// 一个最简单的 loader</span>
+<span class="k">module</span>.exports = <span class="k">function</span>(<span class="fn">source</span>) {
+  <span class="k">const</span> result = transform(source);
+  <span class="k">return</span> result; <span class="c">// 转换后的代码字符串</span>
+};</pre>
+    </div>
+
+    <div class="card webpack">
+      <h3>Plugin <span class="mono">全生命周期扩展</span></h3>
+      <p>本质是一个带 <span class="mono">apply(compiler)</span> 方法的类，通过 <span class="mono">tap</span> / <span class="mono">tapAsync</span> / <span class="mono">tapPromise</span> 订阅 compiler、compilation 生命周期上的具体 hook。</p>
+      <ul>
+        <li><b>职责</b>：触达"整个构建流程" —— 启动、模块解析、chunk 划分、asset 生成、优化压缩，几乎每个阶段都有对应 hook。典型：<span class="mono">HtmlWebpackPlugin</span>、<span class="mono">MiniCssExtractPlugin</span>、<span class="mono">DefinePlugin</span>、Module Federation。</li>
+        <li><b>能力边界</b>：Loader 做不到的事，比如重新划分 chunk、注入全局变量、在打包结束后额外生成/修改产物文件。</li>
+        <li><b>与 Loader 的分工</b>：Loader 解决"如何读懂一个文件"，Plugin 解决"如何组织整条构建流水线"。</li>
+      </ul>
+      <pre><span class="c">// 一个最简单的 plugin</span>
+<span class="k">class</span> MyPlugin {
+  apply(compiler) {
+    compiler.hooks.emit.<span class="fn">tapAsync</span>(
+      <span class="s">'MyPlugin'</span>,
+      (compilation, cb) => { <span class="c">/* ... */</span> cb(); }
+    );
+  }
+}</pre>
+    </div>
+  </div>
+</section>
+
+<section id="vite">
+  <div class="section-head"><span class="tag vite">VITE</span></div>
+  <h2>没有"先打包再启动"这一步</h2>
+  <p class="lede">Vite 的心智模型反过来："先启动，按需编译"。开发模式下浏览器原生按 ESM 请求文件，Vite 收到请求才编译对应的单个文件并返回 —— 启动时间因此和项目里模块总数基本无关，这是它与 webpack 开发体验差异最大的根源。</p>
+
+  <div class="grid2">
+    <div class="card vite">
+      <h3>依赖预构建 <span class="mono">esbuild</span></h3>
+      <p>第三方依赖体量大、更新频率低，很多还是 CommonJS/UMD 格式。Vite 用 esbuild（Go 编写，比纯 JS 工具快一到两个数量级）在启动时把它们转成 ESM，并把每个包内部零散的模块合并成少数几个文件。</p>
+      <ul>
+        <li><b>解决两个问题</b>：CJS/UMD → ESM 的格式兼容；把一个包内几十上百个小模块合并，避免浏览器发起过多请求瀑布。</li>
+        <li>结果缓存在 <span class="mono">node_modules/.vite</span>，依赖没变化时直接复用。</li>
+        <li>这一步只处理 <span class="mono">node_modules</span>，业务代码不会被这里预打包。</li>
+      </ul>
+    </div>
+
+    <div class="card vite">
+      <h3>Vite Plugin <span class="mono">Rollup 接口超集</span></h3>
+      <p>Vite 插件接口兼容 Rollup 的 <span class="mono">resolveId</span> / <span class="mono">load</span> / <span class="mono">transform</span> 等钩子，同时扩展了开发服务器专属的钩子。</p>
+      <ul>
+        <li><span class="mono">configureServer</span>：直接操作底层 connect 服务器实例，相当于中间件。</li>
+        <li><span class="mono">transformIndexHtml</span>：转换 <span class="mono">index.html</span>。</li>
+        <li><span class="mono">handleHotUpdate</span>：自定义 HMR 行为。</li>
+        <li><span class="mono">apply: 'serve' | 'build'</span> 与 <span class="mono">enforce: 'pre' | 'post'</span> 控制插件在哪个阶段生效、执行顺序。</li>
+      </ul>
+      <pre><span class="c">// Vite 插件骨架</span>
+<span class="k">export default</span> () => ({
+  name: <span class="s">'my-plugin'</span>,
+  enforce: <span class="s">'pre'</span>,
+  transform(code, id) { <span class="c">/* ... */</span> }
+});</pre>
+    </div>
+  </div>
+
+  <div class="callout">
+    <h4>生产构建</h4>
+    <p>开发环境不打包，但线上仍需要产物：传统上 Vite 生产构建交给 <b>Rollup</b>（tree-shaking 彻底、输出干净）。从 Vite 7 起可选切换到 <b>Rolldown</b>（Rust 编写、兼容 Rollup 接口的打包器）大幅提速，Vite 8 起 Rolldown 成为默认打包器 —— 详见下方"版本演进"。</p>
+  </div>
+</section>
+
+<section id="compare">
+  <div class="section-head"><span class="tag webpack">对照</span></div>
+  <h2>放在一起看：概念怎么对应</h2>
+  <div class="tablewrap">
+    <table>
+      <thead>
+        <tr><th>维度</th><th style="color:var(--webpack-ink)">Webpack</th><th style="color:var(--vite-ink)">Vite</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>单文件转换</td><td class="webpack-col">Loader（链式函数，返回转换后源码）</td><td class="vite-col">插件的 <span class="mono">transform</span> 钩子（Rollup 风格）</td></tr>
+        <tr><td>全流程扩展</td><td class="webpack-col">Plugin（订阅 Tapable hook）</td><td class="vite-col">插件的其余钩子（<span class="mono">configureServer</span>、<span class="mono">transformIndexHtml</span> 等）——不区分"Loader/Plugin"两套体系，统一是插件</td></tr>
+        <tr><td>底层事件机制</td><td class="webpack-col">Tapable（tap / tapAsync / tapPromise）</td><td class="vite-col">Rollup 风格的函数式钩子 + Vite 自定义钩子</td></tr>
+        <tr><td>依赖图/构建产物</td><td class="webpack-col">Compiler（全局）+ Compilation（每次构建一个实例）</td><td class="vite-col">开发模式无完整依赖图打包，只维护模块依赖关系用于 HMR 失效传播；生产构建时依赖图由 Rollup/Rolldown 管理</td></tr>
+        <tr><td>开发服务器启动</td><td class="webpack-col">先构建完整依赖图再启动，项目越大越慢</td><td class="vite-col">先启动，请求到哪个文件才编译哪个，启动时间与模块总数基本无关</td></tr>
+        <tr><td>第三方依赖处理</td><td class="webpack-col">和业务代码一起进入同一套打包流程</td><td class="vite-col">esbuild 预构建，转 ESM + 合并小模块，与业务代码路径分开</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section id="evolution">
+  <div class="section-head"><span class="tag vite">VITE</span><span class="tag rust">架构演进</span></div>
+  <h2>Vite 版本演进：从"双引擎"到"统一 Rust 引擎"</h2>
+  <p class="lede">这条时间线的主线，是"开发用 esbuild、生产用 Rollup"这套务实的双引擎组合，如何被同一批 Rust 工具逐步统一替换。</p>
+
+  <div class="timeline">
+    <div class="tl-item">
+      <div class="tl-dot">1</div>
+      <div class="tl-head"><span class="tl-ver">v1</span><span class="tl-date">2020.12</span></div>
+      <p>面向 Vue 单文件组件的实验性开发服务器，与 Vue 强绑定，还不是通用构建工具。</p>
+    </div>
+    <div class="tl-item">
+      <div class="tl-dot">2</div>
+      <div class="tl-head"><span class="tl-ver">v2</span><span class="tl-date">2021.02</span></div>
+      <p>架构重写：插件接口对齐 Rollup，变成框架无关的通用工具；开发阶段引入 esbuild 做依赖预构建与 TS/JSX 转译。今天所说的"Vite 架构"基本从这一版定型。</p>
+    </div>
+    <div class="tl-item">
+      <div class="tl-dot">3</div>
+      <div class="tl-head"><span class="tl-ver">v3</span><span class="tl-date">2022.07</span></div>
+      <p>优化配置解析与 base 路径处理，dev / build 行为进一步对齐，SSR 能力增强。</p>
+    </div>
+    <div class="tl-item">
+      <div class="tl-dot">4</div>
+      <div class="tl-head"><span class="tl-ver">v4</span><span class="tl-date">2022.12</span></div>
+      <p>升级 Rollup 3，构建性能与产物体积优化。</p>
+    </div>
+    <div class="tl-item">
+      <div class="tl-dot">5</div>
+      <div class="tl-head"><span class="tl-ver">v5</span><span class="tl-date">2023.11</span></div>
+      <p>升级 Rollup 4（核心 parser 用 Rust 重写以提速），要求 Node 18+，为后续多运行时能力打基础。</p>
+    </div>
+    <div class="tl-item mark">
+      <div class="tl-dot">6</div>
+      <div class="tl-head"><span class="tl-ver">v6</span><span class="tl-date">2024.11</span></div>
+      <p>引入实验性 <b>Environment API</b>：把"浏览器 client / SSR / Edge runtime / Worker"抽象成可插拔的多个 environment，为非浏览器运行时（如 Cloudflare Workers）提供统一的构建心智模型。</p>
+    </div>
+    <div class="tl-item mark">
+      <div class="tl-dot">7</div>
+      <div class="tl-head"><span class="tl-ver">v7</span><span class="tl-date">2025</span></div>
+      <p>推出可选的 <span class="mono">rolldown-vite</span> 包，把 Rust 编写、兼容 Rollup 接口的 <b>Rolldown</b> 作为可插拔替代打包器；新增 <span class="mono">buildApp</span> 钩子支持跨 environment 的插件协作；默认浏览器 baseline 提升（Chrome 87→107 等），发布形态改为纯 ESM，要求 Node 20.19+ / 22.12+。</p>
+    </div>
+    <div class="tl-item mark">
+      <div class="tl-dot">8</div>
+      <div class="tl-head"><span class="tl-ver">v8</span><span class="tl-date">2026</span></div>
+      <p>Rolldown 转正为<b>默认且唯一</b>的打包器，取代"dev 用 esbuild、build 用 Rollup"的双引擎架构；与 Oxc 工具链（同一批 Rust parser/transformer）对齐，官方宣称构建速度提升 10–30 倍，同时保留对现有 Rollup/Vite 插件的兼容层。</p>
+    </div>
+  </div>
+</section>
+
+<section id="modules">
+  <div class="section-head"><span class="tag rust">核心模块演进</span></div>
+  <h2>为什么会走向统一：一条更长的技术脉络</h2>
+  <p class="lede">把版本号背后的动机连起来看，会更清楚"Vite 8 默认切到 Rolldown"这件事在解决什么问题。</p>
+
+  <div class="card" style="border-top:3px solid var(--rust);max-width:none;">
+    <ul style="padding-left:20px;">
+      <li><b>起点问题</b>：JS 生态的构建工具长期是"用 JS 写 JS 工具"——webpack、Rollup 早期实现都是纯 JS，大规模 AST 遍历和字符串处理天然受制于 JS 本身的性能。</li>
+      <li><b>第一波系统语言重写</b>：esbuild（Go，Evan Wallace）率先证明了用系统语言重写 transform/bundle 热点路径能带来数量级的性能提升；随后 swc（Rust）、Rspack（Rust，字节跳动出品，尽量兼容 webpack 的 loader/plugin 配置）、Turbopack（Rust，Vercel/Next.js）相继出现，走的是同一条路：不改变现有心智模型，替换掉性能瓶颈的执行引擎。</li>
+      <li><b>Vite 2 的务实选择</b>：dev 用 esbuild（重启动速度、转译够用），build 用 Rollup（重产物质量、tree-shaking 更彻底）——本质是在当时 Rust/Go 工具链还不够成熟、esbuild 又不追求做到 Rollup 级别打包质量的情况下，用两套引擎覆盖两种场景的折中方案。代价是 dev 和 build 走两套转译/打包语义，长期存在"esbuild 转译结果和 Rollup 打包结果不完全一致"导致的边缘 bug。</li>
+      <li><b>走向统一</b>：Vite 作者 Evan You 创立 VoidZero，目标是用一套 Rust 工具链同时覆盖 dev 和 build 两个场景——<span class="mono">Oxc</span> 负责 parser / transformer / linter，<span class="mono">Rolldown</span> 负责打包，二者共享同一套底层设施。Vite 7 的 <span class="mono">rolldown-vite</span> 是过渡期的可选项，Vite 8 让它成为默认，标志着 Vite 从"胶水层 + 双引擎"演进为"自有 Rust 统一引擎 + 插件生态兼容层"。</li>
+      <li><b>和 webpack 生态的呼应</b>：webpack 核心至今仍是 JS 实现，但 Rspack 在做的是相同方向的事——保留 webpack 的配置项、Loader/Plugin 心智模型，把执行引擎换成 Rust，尽量做到"改一行配置就能迁移"。两条生态路径（Vite→Rolldown、Webpack→Rspack）殊途同归，都是"接口不变、引擎换成系统语言"。</li>
+    </ul>
+  </div>
+</section>
+
+</div>
+
+<footer>
+  <div class="wrap">
+    Vite 7 / Vite 8 变更信息参考官方博客：
+    <a href="https://vite.dev/blog/announcing-vite7">vite.dev/blog/announcing-vite7</a>、
+    <a href="https://vite.dev/blog/announcing-vite8">vite.dev/blog/announcing-vite8</a>。
+  </div>
+</footer>
